@@ -1,7 +1,5 @@
 package users;
 
-import fileio.UserInputData;
-
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
@@ -12,8 +10,8 @@ public class User {
     private Map<String, Integer> history;
     private ArrayList<String> favoriteVideos;
     private int numberOfRatings;
-    private Map<String,Double> moviesRatings;
-    private Map<String, ArrayList<Double>> showRatings;
+    private final Map<String, Double> moviesRatings;
+    private final Map<String, ArrayList<Double>> showRatings;
 
     public User(final String username, final String subscriptionType,
                 final Map<String, Integer> history,
@@ -53,16 +51,8 @@ public class User {
         return moviesRatings;
     }
 
-    public void setMoviesRatings(Map<String, Double> moviesRatings) {
-        this.moviesRatings = moviesRatings;
-    }
-
     public Map<String, ArrayList<Double>> getShowRatings() {
         return showRatings;
-    }
-
-    public void setShowRatings(Map<String, ArrayList<Double>> showRatings) {
-        this.showRatings = showRatings;
     }
 
     public int getNumberOfRatings() {
@@ -86,19 +76,18 @@ public class User {
             this.getHistory().remove(video);
             this.getHistory().put(video, previousValue + 1);
             return previousValue + 1;
-        }
-        else {
+        } else {
             this.getHistory().put(video, 1);
             return 1;
         }
     }
 
-    public int addRating(final String video,final int totalSeasons, final int seasonNum, final Double rating) {
+    public int addRating(final String video, final int totalSeasons, final int seasonNum,
+                         final Double rating) {
         if (this.getHistory().containsKey(video)) {
-            if(this.moviesRatings.containsKey(video)) {
+            if (this.moviesRatings.containsKey(video)) {
                 return -1;
-            }
-            else if (seasonNum == 0) {
+            } else if (seasonNum == 0) {
                 this.moviesRatings.put(video, rating);
                 this.numberOfRatings++;
 
@@ -107,14 +96,12 @@ public class User {
             if (this.showRatings.containsKey(video)) {
                 if (this.showRatings.get(video).get(seasonNum - 1) != 0d) {
                     return -1;
-                }
-                else {
+                } else {
                     this.showRatings.get(video).set(seasonNum - 1, rating);
                     this.numberOfRatings++;
                     return 2;
                 }
-            }
-            else if (seasonNum != 0) {
+            } else if (seasonNum != 0) {
                 ArrayList<Double> showRating = new ArrayList<>();
                 for (int i = 0; i < totalSeasons; i++) {
                     showRating.add(0d);

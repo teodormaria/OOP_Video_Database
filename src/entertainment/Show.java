@@ -1,10 +1,8 @@
 package entertainment;
 
-import fileio.SerialInputData;
-
 import java.util.ArrayList;
 
-public class Show extends Video{
+public class Show extends Video {
 
     private final int numberOfSeasons;
     private final ArrayList<Season> seasons;

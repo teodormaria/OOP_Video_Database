@@ -32,10 +32,11 @@ final public class Database {
     private List<Movie> movies = new ArrayList<>();
     private List<Show> shows = new ArrayList<>();
 
-    private Database() {}
+    private Database() {
+    }
 
     public static Database getInstance() {
-        if(instance == null){
+        if (instance == null) {
             instance = new Database();
         }
         return instance;
@@ -54,8 +55,8 @@ final public class Database {
     }
 
     public User getUserByUsername(final String username) {
-        for(User user: this.users) {
-            if(user.getUsername().equalsIgnoreCase(username)) {
+        for (User user: this.users) {
+            if (user.getUsername().equalsIgnoreCase(username)) {
                 return user;
             }
         }
@@ -63,8 +64,8 @@ final public class Database {
     }
 
     public Movie getMovieByTitle(final String title) {
-        for(Movie movie: this.movies) {
-            if(movie.getTitle().equalsIgnoreCase(title)) {
+        for (Movie movie: this.movies) {
+            if (movie.getTitle().equalsIgnoreCase(title)) {
                 return movie;
             }
         }
@@ -72,8 +73,8 @@ final public class Database {
     }
 
     public Show getShowByTitle(final String title) {
-        for(Show show: this.shows) {
-            if(show.getTitle().equalsIgnoreCase(title)) {
+        for (Show show: this.shows) {
+            if (show.getTitle().equalsIgnoreCase(title)) {
                 return show;
             }
         }
@@ -81,8 +82,8 @@ final public class Database {
     }
 
     public ActorInputData getActorByName(final String name) {
-        for(ActorInputData actor: this.actorsData) {
-            if(actor.getName().equalsIgnoreCase(name)) {
+        for (ActorInputData actor: this.actorsData) {
+            if (actor.getName().equalsIgnoreCase(name)) {
                 return actor;
             }
         }
@@ -120,43 +121,43 @@ final public class Database {
     public void populateDatabase(Input input) {
         this.setActorsData(input.getActors());
         this.setCommandsData(input.getCommands());
-        for(UserInputData userData: input.getUsers()) {
+        for (UserInputData userData: input.getUsers()) {
             this.users.add(new User(userData.getUsername(), userData.getSubscriptionType(),
                     userData.getHistory(), userData.getFavoriteMovies()));
         }
-        for(MovieInputData movieData: input.getMovies()) {
+        for (MovieInputData movieData: input.getMovies()) {
             this.movies.add(new Movie(movieData.getTitle(), movieData.getCast(),
                     movieData.getGenres(), movieData.getYear(), movieData.getDuration()));
         }
-        for(SerialInputData serialData: input.getSerials()) {
+        for (SerialInputData serialData: input.getSerials()) {
             this.shows.add(new Show(serialData.getTitle(), serialData.getCast(),
                     serialData.getGenres(), serialData.getNumberSeason(), serialData.getSeasons(),
                     serialData.getYear()));
         }
-        for(User user: this.getUsers()) {
-            for(String video: user.getFavoriteVideos()) {
+        for (User user: this.getUsers()) {
+            for (String video: user.getFavoriteVideos()) {
                 Movie movie = getMovieByTitle(video);
                 Show show = getShowByTitle(video);
-                if(movie != null) {
+                if (movie != null) {
                     movie.addFavorite();
                 }
-                if(show != null) {
+                if (show != null) {
                     show.addFavorite();
                 }
             }
-            for(String video: user.getHistory().keySet()) {
+            for (String video: user.getHistory().keySet()) {
                 Movie movie = getMovieByTitle(video);
                 Show show = getShowByTitle(video);
-                if(movie != null) {
-                    if(user.getHistory().containsKey(video)) {
-                        for(int i = 0; i < user.getHistory().get(video); i++) {
+                if (movie != null) {
+                    if (user.getHistory().containsKey(video)) {
+                        for (int i = 0; i < user.getHistory().get(video); i++) {
                             movie.addView();
                         }
                     }
                 }
-                if(show != null) {
-                    if(user.getHistory().containsKey(video)) {
-                        for(int i = 0; i < user.getHistory().get(video); i++) {
+                if (show != null) {
+                    if (user.getHistory().containsKey(video)) {
+                        for (int i = 0; i < user.getHistory().get(video); i++) {
                             show.addView();
                         }
                     }
@@ -178,21 +179,19 @@ final public class Database {
         int added = user.addFavorite(command.getTitle());
         JSONObject object = new JSONObject();
         object.put("id", command.getActionId());
-        if(added == 1) {
+        if (added == 1) {
             Movie movie = getMovieByTitle(command.getTitle());
             Show show = getShowByTitle(command.getTitle());
-            if(movie != null) {
+            if (movie != null) {
                 movie.addFavorite();
             }
-            if(show != null) {
+            if (show != null) {
                 show.addFavorite();
             }
             object.put("message", "success -> " + command.getTitle() + " was added as favourite");
-        }
-        else if (added == -1) {
+        } else if (added == -1) {
             object.put("message", "error -> " + command.getTitle() + " is already in favourite list");
-        }
-        else {
+        } else {
             object.put("message", "error -> " + command.getTitle() + " is not seen");
         }
         return object;
@@ -202,10 +201,10 @@ final public class Database {
         User user = getUserByUsername(command.getUsername());
         Movie movie = getMovieByTitle(command.getTitle());
         Show show = getShowByTitle(command.getTitle());
-        if(movie != null) {
+        if (movie != null) {
             movie.addView();
         }
-        if(show != null) {
+        if (show != null) {
             show.addView();
         }
         int timesWatched = user.watch(command.getTitle());
@@ -221,32 +220,29 @@ final public class Database {
         Show show = getShowByTitle(command.getTitle());
         Movie movie = getMovieByTitle(command.getTitle());
         int totalSeasons;
-        if(show == null) {
+        if (show == null) {
             totalSeasons = 0;
-        }
-        else {
+        } else {
             totalSeasons = show.getNumberOfSeasons();
         }
         int isSuccess = user.addRating(command.getTitle(), totalSeasons, command.getSeasonNumber(), command.getGrade());
-        if(isSuccess == 1) {
+        if (isSuccess == 1) {
             movie.addRating(command.getGrade());
         }
-        if(isSuccess == 2) {
+        if (isSuccess == 2) {
             show.getSeasons().get(command.getSeasonNumber() - 1).addRating(command.getGrade());
         }
-        if(isSuccess == 1 || isSuccess == 2) {
+        if (isSuccess == 1 || isSuccess == 2) {
             object.put("id", command.getActionId());
             object.put("message", "success -> "
                     + command.getTitle() + " was rated with "
                     + command.getGrade() +  " by "
                     + command.getUsername());
-        }
-        else if(isSuccess == -1) {
+        } else if (isSuccess == -1) {
             object.put("id", command.getActionId());
             object.put("message", "error -> "
                     + command.getTitle() + " has been already rated");
-        }
-        else if(isSuccess == 0) {
+        } else if (isSuccess == 0) {
             object.put("id", command.getActionId());
             object.put("message", "error -> "
                     + command.getTitle() + " is not seen");
@@ -258,17 +254,17 @@ final public class Database {
         ActorInputData actor = getActorByName(actorName);
         int totalRated = 0;
         Double average = 0d;
-        for(String videoName: actor.getFilmography()) {
+        for (String videoName: actor.getFilmography()) {
             Movie movie = getMovieByTitle(videoName);
             Show show = getShowByTitle(videoName);
-            if(movie != null) {
-                if(!movie.getRatings().isEmpty()) {
+            if (movie != null) {
+                if (!movie.getRatings().isEmpty()) {
                     average += movie.averageRating();
                     totalRated++;
                 }
             }
-            if(show != null) {
-                if(show.serialAverageRating() != 0) {
+            if (show != null) {
+                if (show.serialAverageRating() != 0) {
                     average += show.serialAverageRating();
                     totalRated++;
                 }
@@ -283,7 +279,7 @@ final public class Database {
         List<String> keys = new ArrayList<>(unsortedMap.keySet());
         List<Double> values = new ArrayList<>(unsortedMap.values());
         Collections.sort(keys);
-        switch(order) {
+        switch (order) {
             case Constants.ASC:
                 Collections.sort(values);
                 break;
@@ -296,12 +292,12 @@ final public class Database {
 
         LinkedHashMap<String, Double> sortedMap = new LinkedHashMap<>();
         Iterator<Double> valuesIterator = values.iterator();
-        while(valuesIterator.hasNext()) {
+        while (valuesIterator.hasNext()) {
             Double value = valuesIterator.next();
             Iterator<String> keyIterator = keys.iterator();
-            while(keyIterator.hasNext()) {
+            while (keyIterator.hasNext()) {
                 String key = keyIterator.next();
-                if(unsortedMap.get(key).equals(value)) {
+                if (unsortedMap.get(key).equals(value)) {
                     keyIterator.remove();
                     sortedMap.put(key, value);
                     break;
@@ -315,7 +311,7 @@ final public class Database {
         List<String> keys = new ArrayList<>(unsortedMap.keySet());
         List<Integer> values = new ArrayList<>(unsortedMap.values());
         Collections.sort(keys);
-        switch(order) {
+        switch (order) {
             case Constants.ASC:
                 Collections.sort(values);
                 break;
@@ -328,12 +324,12 @@ final public class Database {
 
         LinkedHashMap<String, Integer> sortedMap = new LinkedHashMap<>();
         Iterator<Integer> valuesIterator = values.iterator();
-        while(valuesIterator.hasNext()) {
+        while (valuesIterator.hasNext()) {
             Integer value = valuesIterator.next();
             Iterator<String> keyIterator = keys.iterator();
-            while(keyIterator.hasNext()) {
+            while (keyIterator.hasNext()) {
                 String key = keyIterator.next();
-                if(unsortedMap.get(key).equals(value)) {
+                if (unsortedMap.get(key).equals(value)) {
                     keyIterator.remove();
                     sortedMap.put(key, value);
                     break;
@@ -345,13 +341,13 @@ final public class Database {
 
     public JSONObject averageActors(ActionInputData action) {
         HashMap<String, Double> actorRatings = new HashMap<>();
-        for(ActorInputData actor: this.getActorsData()) {
+        for (ActorInputData actor: this.getActorsData()) {
             actorRatings.put(actor.getName(), this.getActorAverage(actor.getName()));
         }
         LinkedHashMap<String, Double> sortedByRatings = sortHashMapByValue(actorRatings, action.getSortType());
         List<String> actors = new ArrayList<>();
-        for(int i = 0; i < action.getNumber(); i++) {
-            if(sortedByRatings.isEmpty()) {
+        for (int i = 0; i < action.getNumber(); i++) {
+            if (sortedByRatings.isEmpty()) {
                 break;
             }
             Iterator<Map.Entry<String, Double>> iterator = sortedByRatings.entrySet().iterator();
@@ -367,33 +363,31 @@ final public class Database {
 
     public JSONObject awardedActors(ActionInputData action) {
         ArrayList<String> actors = new ArrayList<>();
-        for(ActorInputData actor: this.actorsData) {
+        for (ActorInputData actor: this.actorsData) {
             Boolean hasAwards = Boolean.TRUE;
-            for(String award: action.getFilters().get(3)) {
+            for (String award: action.getFilters().get(Constants.AWARD_FILTER)) {
                 ActorsAwards aw = Utils.stringToAwards(award);
-                if(!actor.getAwards().containsKey(aw)) {
+                if (!actor.getAwards().containsKey(aw)) {
                     hasAwards = Boolean.FALSE;
                 }
             }
-            if(hasAwards) {
+            if (hasAwards) {
                 actors.add(actor.getName());
             }
         }
-        if(action.getSortType() == Constants.ASC) {
+        if (action.getSortType() == Constants.ASC) {
             Collections.sort(actors);
-        }
-        else if(action.getSortType() == Constants.DESC) {
+        } else if (action.getSortType() == Constants.DESC) {
             Collections.sort(actors, Collections.reverseOrder());
         }
-        if(actors.size() < action.getNumber()) {
+        if (actors.size() < action.getNumber()) {
             JSONObject object = new JSONObject();
             object.put("id", action.getActionId());
             object.put("message", "Query result: " + actors);
             return object;
-        }
-        else {
+        } else {
             ArrayList<String> nActors = new ArrayList<>();
-            for(int i = 0; i < action.getNumber(); i++) {
+            for (int i = 0; i < action.getNumber(); i++) {
                 nActors.add(actors.get(i));
             }
             JSONObject object = new JSONObject();
@@ -405,32 +399,30 @@ final public class Database {
 
     public JSONObject filter(ActionInputData action) {
         ArrayList<String> actors = new ArrayList<>();
-        for(ActorInputData actor: this.actorsData) {
-            Boolean hasAwards = Boolean.TRUE;
-            for(String word: action.getFilters().get(2)) {
-                if(!actor.getCareerDescription().toLowerCase().contains(word)) {
-                    hasAwards = Boolean.FALSE;
+        for (ActorInputData actor: this.actorsData) {
+            Boolean hasWords = Boolean.TRUE;
+            for (String word: action.getFilters().get(Constants.WORD_FILTER)) {
+                if (!actor.getCareerDescription().toLowerCase().contains(word)) {
+                    hasWords = Boolean.FALSE;
                 }
             }
-            if(hasAwards) {
+            if (hasWords) {
                 actors.add(actor.getName());
             }
         }
-        if(action.getSortType() == Constants.ASC) {
+        if (action.getSortType() == Constants.ASC) {
             Collections.sort(actors);
-        }
-        else if(action.getSortType() == Constants.DESC) {
+        } else if (action.getSortType() == Constants.DESC) {
             Collections.sort(actors, Collections.reverseOrder());
         }
-        if(actors.size() < action.getNumber()) {
+        if (actors.size() < action.getNumber()) {
             JSONObject object = new JSONObject();
             object.put("id", action.getActionId());
             object.put("message", "Query result: " + actors);
             return object;
-        }
-        else {
+        } else {
             ArrayList<String> nActors = new ArrayList<>();
-            for(int i = 0; i < action.getNumber(); i++) {
+            for (int i = 0; i < action.getNumber(); i++) {
                 nActors.add(actors.get(i));
             }
             JSONObject object = new JSONObject();
@@ -442,37 +434,39 @@ final public class Database {
 
     public JSONObject moviesByRating(ActionInputData action) {
         HashMap<String, Double> movieRatings = new HashMap<>();
-        for(Movie movie: this.getMovies()) {
-            if(movie.averageRating() != 0d) {
-                Boolean noYear = (action.getFilters().get(0).get(0) == null);
-                Boolean noGenre = (action.getFilters().get(1).get(0) == null);
-                if(!noYear && !noGenre) {
-                    Boolean respectsYear = (action.getFilters().get(0).get(0).equalsIgnoreCase(String.valueOf(movie.getYear())));
-                    Boolean respectsGenre = (movie.getGenres().contains(action.getFilters().get(1).get(0)));
-                    if(respectsYear && respectsGenre) {
+        for (Movie movie: this.getMovies()) {
+            if (movie.averageRating() != 0d) {
+                Boolean noYear = (action.getFilters().get(Constants.YEAR_FILTER).get(0) == null);
+                Boolean noGenre = (action.getFilters().get(Constants.GENRE_FILTER).get(0) == null);
+                if (!noYear && !noGenre) {
+                    Boolean respectsYear = (action.getFilters().get(Constants.YEAR_FILTER).get(0).
+                            equalsIgnoreCase(String.valueOf(movie.getYear())));
+                    Boolean respectsGenre = (movie.getGenres().contains(action.getFilters().
+                            get(Constants.GENRE_FILTER).get(0)));
+                    if (respectsYear && respectsGenre) {
                         movieRatings.put(movie.getTitle(), movie.averageRating());
                     }
-                }
-                else if(!noGenre) {
-                    Boolean respectsGenre = (movie.getGenres().contains(action.getFilters().get(1).get(0)));
-                    if(respectsGenre) {
+                } else if (!noGenre) {
+                    Boolean respectsGenre = (movie.getGenres().contains(action.getFilters().
+                            get(Constants.GENRE_FILTER).get(0)));
+                    if (respectsGenre) {
                         movieRatings.put(movie.getTitle(), movie.averageRating());
                     }
                 } else if (!noYear) {
-                    Boolean respectsYear = (action.getFilters().get(0).get(0).equalsIgnoreCase(String.valueOf(movie.getYear())));
-                    if(respectsYear) {
+                    Boolean respectsYear = (action.getFilters().get(Constants.YEAR_FILTER).get(0).
+                            equalsIgnoreCase(String.valueOf(movie.getYear())));
+                    if (respectsYear) {
                         movieRatings.put(movie.getTitle(), movie.averageRating());
                     }
-                }
-                else {
+                } else {
                     movieRatings.put(movie.getTitle(), movie.averageRating());
                 }
             }
         }
         LinkedHashMap<String, Double> sortedByRatings = sortHashMapByValue(movieRatings, action.getSortType());
         List<String> movies = new ArrayList<>();
-        for(int i = 0; i < action.getNumber(); i++) {
-            if(sortedByRatings.isEmpty()) {
+        for (int i = 0; i < action.getNumber(); i++) {
+            if (sortedByRatings.isEmpty()) {
                 break;
             }
             Iterator<Map.Entry<String, Double>> iterator = sortedByRatings.entrySet().iterator();
@@ -488,37 +482,39 @@ final public class Database {
 
     public JSONObject showsByRating(ActionInputData action) {
         HashMap<String, Double> showsRatings = new HashMap<>();
-        for(Show show: this.getShows()) {
-            if(show.serialAverageRating() != 0d) {
-                Boolean noYear = (action.getFilters().get(0).get(0) == null);
+        for (Show show: this.getShows()) {
+            if (show.serialAverageRating() != 0d) {
+                Boolean noYear = (action.getFilters().get(Constants.YEAR_FILTER).get(0) == null);
                 Boolean noGenre = (action.getFilters().get(1).get(0) == null);
-                if(!noYear && !noGenre) {
-                    Boolean respectsYear = (action.getFilters().get(0).get(0).equalsIgnoreCase(String.valueOf(show.getYear())));
-                    Boolean respectsGenre = (show.getGenres().contains(action.getFilters().get(1).get(0)));
-                    if(respectsYear && respectsGenre) {
+                if (!noYear && !noGenre) {
+                    Boolean respectsYear = (action.getFilters().get(Constants.YEAR_FILTER).get(0).
+                            equalsIgnoreCase(String.valueOf(show.getYear())));
+                    Boolean respectsGenre = (show.getGenres().contains(action.getFilters().
+                            get(Constants.GENRE_FILTER).get(0)));
+                    if (respectsYear && respectsGenre) {
                         showsRatings.put(show.getTitle(), show.serialAverageRating());
                     }
-                }
-                else if(!noGenre) {
-                    Boolean respectsGenre = (show.getGenres().contains(action.getFilters().get(1).get(0)));
-                    if(respectsGenre) {
+                } else if (!noGenre) {
+                    Boolean respectsGenre = (show.getGenres().contains(action.getFilters().
+                            get(Constants.GENRE_FILTER).get(0)));
+                    if (respectsGenre) {
                         showsRatings.put(show.getTitle(), show.serialAverageRating());
                     }
                 } else if (!noYear) {
-                    Boolean respectsYear = (action.getFilters().get(0).get(0).equalsIgnoreCase(String.valueOf(show.getYear())));
-                    if(respectsYear) {
+                    Boolean respectsYear = (action.getFilters().get(Constants.YEAR_FILTER).get(0).
+                            equalsIgnoreCase(String.valueOf(show.getYear())));
+                    if (respectsYear) {
                         showsRatings.put(show.getTitle(), show.serialAverageRating());
                     }
-                }
-                else {
+                } else {
                     showsRatings.put(show.getTitle(), show.serialAverageRating());
                 }
             }
         }
         LinkedHashMap<String, Double> sortedByRatings = sortHashMapByValue(showsRatings, action.getSortType());
         List<String> shows = new ArrayList<>();
-        for(int i = 0; i < action.getNumber(); i++) {
-            if(sortedByRatings.isEmpty()) {
+        for (int i = 0; i < action.getNumber(); i++) {
+            if (sortedByRatings.isEmpty()) {
                 break;
             }
             Iterator<Map.Entry<String, Double>> iterator = sortedByRatings.entrySet().iterator();
@@ -534,37 +530,39 @@ final public class Database {
 
     public JSONObject moviesByFavorite(ActionInputData action) {
         HashMap<String, Integer> moviesFavorite = new HashMap<>();
-        for(Movie movie: this.getMovies()) {
-            if(movie.getTimesAddedToFavorites() != 0) {
-                Boolean noYear = (action.getFilters().get(0).get(0) == null);
-                Boolean noGenre = (action.getFilters().get(1).get(0) == null);
-                if(!noYear && !noGenre) {
-                    Boolean respectsYear = (action.getFilters().get(0).get(0).equalsIgnoreCase(String.valueOf(movie.getYear())));
-                    Boolean respectsGenre = (movie.getGenres().contains(action.getFilters().get(1).get(0)));
-                    if(respectsYear && respectsGenre) {
+        for (Movie movie: this.getMovies()) {
+            if (movie.getTimesAddedToFavorites() != 0) {
+                Boolean noYear = (action.getFilters().get(Constants.YEAR_FILTER).get(0) == null);
+                Boolean noGenre = (action.getFilters().get(Constants.GENRE_FILTER).get(0) == null);
+                if (!noYear && !noGenre) {
+                    Boolean respectsYear = (action.getFilters().get(Constants.YEAR_FILTER).get(0).
+                            equalsIgnoreCase(String.valueOf(movie.getYear())));
+                    Boolean respectsGenre = (movie.getGenres().contains(action.getFilters().
+                            get(Constants.GENRE_FILTER).get(0)));
+                    if (respectsYear && respectsGenre) {
                         moviesFavorite.put(movie.getTitle(), movie.getTimesAddedToFavorites());
                     }
-                }
-                else if(!noGenre) {
-                    Boolean respectsGenre = (movie.getGenres().contains(action.getFilters().get(1).get(0)));
-                    if(respectsGenre) {
+                } else if (!noGenre) {
+                    Boolean respectsGenre = (movie.getGenres().contains(action.getFilters().
+                            get(Constants.GENRE_FILTER).get(0)));
+                    if (respectsGenre) {
                         moviesFavorite.put(movie.getTitle(), movie.getTimesAddedToFavorites());
                     }
                 } else if (!noYear) {
-                    Boolean respectsYear = (action.getFilters().get(0).get(0).equalsIgnoreCase(String.valueOf(movie.getYear())));
-                    if(respectsYear) {
+                    Boolean respectsYear = (action.getFilters().get(Constants.YEAR_FILTER).get(0).
+                            equalsIgnoreCase(String.valueOf(movie.getYear())));
+                    if (respectsYear) {
                         moviesFavorite.put(movie.getTitle(), movie.getTimesAddedToFavorites());
                     }
-                }
-                else {
+                } else {
                     moviesFavorite.put(movie.getTitle(), movie.getTimesAddedToFavorites());
                 }
             }
         }
         LinkedHashMap<String, Integer> sortedByRatings = sortHashMapByValueInteger(moviesFavorite, action.getSortType());
         List<String> movies = new ArrayList<>();
-        for(int i = 0; i < action.getNumber(); i++) {
-            if(sortedByRatings.isEmpty()) {
+        for (int i = 0; i < action.getNumber(); i++) {
+            if (sortedByRatings.isEmpty()) {
                 break;
             }
             Iterator<Map.Entry<String, Integer>> iterator = sortedByRatings.entrySet().iterator();
@@ -580,37 +578,39 @@ final public class Database {
 
     public JSONObject showsByFavorite(ActionInputData action) {
         HashMap<String, Integer> showsFavorite = new HashMap<>();
-        for(Show show: this.getShows()) {
-            if(show.getTimesAddedToFavorites() != 0) {
-                Boolean noYear = (action.getFilters().get(0).get(0) == null);
-                Boolean noGenre = (action.getFilters().get(1).get(0) == null);
-                if(!noYear && !noGenre) {
-                    Boolean respectsYear = (action.getFilters().get(0).get(0).equalsIgnoreCase(String.valueOf(show.getYear())));
-                    Boolean respectsGenre = (show.getGenres().contains(action.getFilters().get(1).get(0)));
-                    if(respectsYear && respectsGenre) {
+        for (Show show: this.getShows()) {
+            if (show.getTimesAddedToFavorites() != 0) {
+                Boolean noYear = (action.getFilters().get(Constants.YEAR_FILTER).get(0) == null);
+                Boolean noGenre = (action.getFilters().get(Constants.GENRE_FILTER).get(0) == null);
+                if (!noYear && !noGenre) {
+                    Boolean respectsYear = (action.getFilters().get(Constants.YEAR_FILTER).
+                            get(0).equalsIgnoreCase(String.valueOf(show.getYear())));
+                    Boolean respectsGenre = (show.getGenres().contains(action.getFilters().
+                            get(Constants.GENRE_FILTER).get(0)));
+                    if (respectsYear && respectsGenre) {
                         showsFavorite.put(show.getTitle(), show.getTimesAddedToFavorites());
                     }
-                }
-                else if(!noGenre) {
-                    Boolean respectsGenre = (show.getGenres().contains(action.getFilters().get(1).get(0)));
-                    if(respectsGenre) {
+                } else if (!noGenre) {
+                    Boolean respectsGenre = (show.getGenres().contains(action.getFilters().
+                            get(Constants.GENRE_FILTER).get(0)));
+                    if (respectsGenre) {
                         showsFavorite.put(show.getTitle(), show.getTimesAddedToFavorites());
                     }
                 } else if (!noYear) {
-                    Boolean respectsYear = (action.getFilters().get(0).get(0).equalsIgnoreCase(String.valueOf(show.getYear())));
-                    if(respectsYear) {
+                    Boolean respectsYear = (action.getFilters().get(Constants.YEAR_FILTER).get(0).
+                            equalsIgnoreCase(String.valueOf(show.getYear())));
+                    if (respectsYear) {
                         showsFavorite.put(show.getTitle(), show.getTimesAddedToFavorites());
                     }
-                }
-                else {
+                } else {
                     showsFavorite.put(show.getTitle(), show.getTimesAddedToFavorites());
                 }
             }
         }
         LinkedHashMap<String, Integer> sortedByRatings = sortHashMapByValueInteger(showsFavorite, action.getSortType());
         List<String> shows = new ArrayList<>();
-        for(int i = 0; i < action.getNumber(); i++) {
-            if(sortedByRatings.isEmpty()) {
+        for (int i = 0; i < action.getNumber(); i++) {
+            if (sortedByRatings.isEmpty()) {
                 break;
             }
             Iterator<Map.Entry<String, Integer>> iterator = sortedByRatings.entrySet().iterator();
@@ -626,35 +626,33 @@ final public class Database {
 
     public JSONObject moviesByDuration(ActionInputData action) {
         HashMap<String, Integer> moviesFavorite = new HashMap<>();
-        for(Movie movie: this.getMovies()) {
+        for (Movie movie: this.getMovies()) {
             Boolean noYear = (action.getFilters().get(0).get(0) == null);
             Boolean noGenre = (action.getFilters().get(1).get(0) == null);
-            if(!noYear && !noGenre) {
+            if (!noYear && !noGenre) {
                 Boolean respectsYear = (action.getFilters().get(0).get(0).equalsIgnoreCase(String.valueOf(movie.getYear())));
                 Boolean respectsGenre = (movie.getGenres().contains(action.getFilters().get(1).get(0)));
-                if(respectsYear && respectsGenre) {
+                if (respectsYear && respectsGenre) {
                     moviesFavorite.put(movie.getTitle(), movie.getDuration());
                 }
-            }
-            else if(!noGenre) {
+            } else if (!noGenre) {
                 Boolean respectsGenre = (movie.getGenres().contains(action.getFilters().get(1).get(0)));
-                if(respectsGenre) {
+                if (respectsGenre) {
                     moviesFavorite.put(movie.getTitle(), movie.getDuration());
                 }
             } else if (!noYear) {
                 Boolean respectsYear = (action.getFilters().get(0).get(0).equalsIgnoreCase(String.valueOf(movie.getYear())));
-                if(respectsYear) {
+                if (respectsYear) {
                     moviesFavorite.put(movie.getTitle(), movie.getDuration());
                 }
-            }
-            else {
+            } else {
                 moviesFavorite.put(movie.getTitle(), movie.getDuration());
             }
         }
         LinkedHashMap<String, Integer> sortedByRatings = sortHashMapByValueInteger(moviesFavorite, action.getSortType());
         List<String> movies = new ArrayList<>();
-        for(int i = 0; i < action.getNumber(); i++) {
-            if(sortedByRatings.isEmpty()) {
+        for (int i = 0; i < action.getNumber(); i++) {
+            if (sortedByRatings.isEmpty()) {
                 break;
             }
             Iterator<Map.Entry<String, Integer>> iterator = sortedByRatings.entrySet().iterator();
@@ -670,35 +668,33 @@ final public class Database {
 
     public JSONObject showsByDuration(ActionInputData action) {
         HashMap<String, Integer> showsFavorite = new HashMap<>();
-        for(Show show: this.getShows()) {
+        for (Show show: this.getShows()) {
             Boolean noYear = (action.getFilters().get(0).get(0) == null);
             Boolean noGenre = (action.getFilters().get(1).get(0) == null);
-            if(!noYear && !noGenre) {
+            if (!noYear && !noGenre) {
                 Boolean respectsYear = (action.getFilters().get(0).get(0).equalsIgnoreCase(String.valueOf(show.getYear())));
                 Boolean respectsGenre = (show.getGenres().contains(action.getFilters().get(1).get(0)));
-                if(respectsYear && respectsGenre) {
+                if (respectsYear && respectsGenre) {
                     showsFavorite.put(show.getTitle(), show.getDuration());
                 }
-            }
-            else if(!noGenre) {
+            } else if (!noGenre) {
                 Boolean respectsGenre = (show.getGenres().contains(action.getFilters().get(1).get(0)));
-                if(respectsGenre) {
+                if (respectsGenre) {
                     showsFavorite.put(show.getTitle(), show.getDuration());
                 }
             } else if (!noYear) {
                 Boolean respectsYear = (action.getFilters().get(0).get(0).equalsIgnoreCase(String.valueOf(show.getYear())));
-                if(respectsYear) {
+                if (respectsYear) {
                     showsFavorite.put(show.getTitle(), show.getDuration());
                 }
-            }
-            else {
+            } else {
                 showsFavorite.put(show.getTitle(), show.getDuration());
             }
         }
         LinkedHashMap<String, Integer> sortedByRatings = sortHashMapByValueInteger(showsFavorite, action.getSortType());
         List<String> shows = new ArrayList<>();
-        for(int i = 0; i < action.getNumber(); i++) {
-            if(sortedByRatings.isEmpty()) {
+        for (int i = 0; i < action.getNumber(); i++) {
+            if (sortedByRatings.isEmpty()) {
                 break;
             }
             Iterator<Map.Entry<String, Integer>> iterator = sortedByRatings.entrySet().iterator();
@@ -714,37 +710,35 @@ final public class Database {
 
     public JSONObject moviesByViews(ActionInputData action) {
         HashMap<String, Integer> moviesFavorite = new HashMap<>();
-        for(Movie movie: this.getMovies()) {
-            if(movie.getTimesWatched() != 0) {
+        for (Movie movie: this.getMovies()) {
+            if (movie.getTimesWatched() != 0) {
                 Boolean noYear = (action.getFilters().get(0).get(0) == null);
                 Boolean noGenre = (action.getFilters().get(1).get(0) == null);
-                if(!noYear && !noGenre) {
+                if (!noYear && !noGenre) {
                     Boolean respectsYear = (action.getFilters().get(0).get(0).equalsIgnoreCase(String.valueOf(movie.getYear())));
                     Boolean respectsGenre = (movie.getGenres().contains(action.getFilters().get(1).get(0)));
-                    if(respectsYear && respectsGenre) {
+                    if (respectsYear && respectsGenre) {
                         moviesFavorite.put(movie.getTitle(), movie.getTimesWatched());
                     }
-                }
-                else if(!noGenre) {
+                } else if (!noGenre) {
                     Boolean respectsGenre = (movie.getGenres().contains(action.getFilters().get(1).get(0)));
-                    if(respectsGenre) {
+                    if (respectsGenre) {
                         moviesFavorite.put(movie.getTitle(), movie.getTimesWatched());
                     }
                 } else if (!noYear) {
                     Boolean respectsYear = (action.getFilters().get(0).get(0).equalsIgnoreCase(String.valueOf(movie.getYear())));
-                    if(respectsYear) {
+                    if (respectsYear) {
                         moviesFavorite.put(movie.getTitle(), movie.getTimesWatched());
                     }
-                }
-                else {
+                } else {
                     moviesFavorite.put(movie.getTitle(), movie.getTimesWatched());
                 }
             }
         }
         LinkedHashMap<String, Integer> sortedByRatings = sortHashMapByValueInteger(moviesFavorite, action.getSortType());
         List<String> movies = new ArrayList<>();
-        for(int i = 0; i < action.getNumber(); i++) {
-            if(sortedByRatings.isEmpty()) {
+        for (int i = 0; i < action.getNumber(); i++) {
+            if (sortedByRatings.isEmpty()) {
                 break;
             }
             Iterator<Map.Entry<String, Integer>> iterator = sortedByRatings.entrySet().iterator();
@@ -760,37 +754,35 @@ final public class Database {
 
     public JSONObject showsByViews(ActionInputData action) {
         HashMap<String, Integer> showsFavorite = new HashMap<>();
-        for(Show show: this.getShows()) {
-            if(show.getTimesWatched() != 0) {
+        for (Show show: this.getShows()) {
+            if (show.getTimesWatched() != 0) {
                 Boolean noYear = (action.getFilters().get(0).get(0) == null);
                 Boolean noGenre = (action.getFilters().get(1).get(0) == null);
-                if(!noYear && !noGenre) {
+                if (!noYear && !noGenre) {
                     Boolean respectsYear = (action.getFilters().get(0).get(0).equalsIgnoreCase(String.valueOf(show.getYear())));
                     Boolean respectsGenre = (show.getGenres().contains(action.getFilters().get(1).get(0)));
-                    if(respectsYear && respectsGenre) {
+                    if (respectsYear && respectsGenre) {
                         showsFavorite.put(show.getTitle(), show.getTimesWatched());
                     }
-                }
-                else if(!noGenre) {
+                } else if (!noGenre) {
                     Boolean respectsGenre = (show.getGenres().contains(action.getFilters().get(1).get(0)));
-                    if(respectsGenre) {
+                    if (respectsGenre) {
                         showsFavorite.put(show.getTitle(), show.getTimesWatched());
                     }
                 } else if (!noYear) {
                     Boolean respectsYear = (action.getFilters().get(0).get(0).equalsIgnoreCase(String.valueOf(show.getYear())));
-                    if(respectsYear) {
+                    if (respectsYear) {
                         showsFavorite.put(show.getTitle(), show.getTimesWatched());
                     }
-                }
-                else {
+                } else {
                     showsFavorite.put(show.getTitle(), show.getTimesWatched());
                 }
             }
         }
         LinkedHashMap<String, Integer> sortedByRatings = sortHashMapByValueInteger(showsFavorite, action.getSortType());
         List<String> shows = new ArrayList<>();
-        for(int i = 0; i < action.getNumber(); i++) {
-            if(sortedByRatings.isEmpty()) {
+        for (int i = 0; i < action.getNumber(); i++) {
+            if (sortedByRatings.isEmpty()) {
                 break;
             }
             Iterator<Map.Entry<String, Integer>> iterator = sortedByRatings.entrySet().iterator();
@@ -806,15 +798,15 @@ final public class Database {
 
     public JSONObject usersByReviews(ActionInputData action) {
         HashMap<String, Integer> userReviews = new HashMap<>();
-        for(User user: this.getUsers()) {
-            if(user.getNumberOfRatings() != 0) {
+        for (User user: this.getUsers()) {
+            if (user.getNumberOfRatings() != 0) {
                 userReviews.put(user.getUsername(),user.getNumberOfRatings());
             }
         }
         LinkedHashMap<String, Integer> sortedByReviews = sortHashMapByValueInteger(userReviews, action.getSortType());
         List<String> users = new ArrayList<>();
-        for(int i = 0; i < action.getNumber(); i++) {
-            if(sortedByReviews.isEmpty()) {
+        for (int i = 0; i < action.getNumber(); i++) {
+            if (sortedByReviews.isEmpty()) {
                 break;
             }
             Iterator<Map.Entry<String, Integer>> iterator = sortedByReviews.entrySet().iterator();
@@ -832,13 +824,13 @@ final public class Database {
         User user = getUserByUsername(action.getUsername());
         ArrayList<Movie> moviesCopy = new ArrayList<>();
         moviesCopy.addAll(this.movies);
-        for(String movieName: user.getHistory().keySet()) {
+        for (String movieName: user.getHistory().keySet()) {
             Movie movie = getMovieByTitle(movieName);
-            if(movie != null) {
+            if (movie != null) {
                 moviesCopy.remove(movie);
             }
         }
-        if(!moviesCopy.isEmpty()) {
+        if (!moviesCopy.isEmpty()) {
             JSONObject object = new JSONObject();
             object.put("id", action.getActionId());
             object.put("message", "StandardRecommendation result: " + moviesCopy.get(0).getTitle());
@@ -846,18 +838,17 @@ final public class Database {
         }
         ArrayList<Show> showsCopy = new ArrayList<>();
         showsCopy.addAll(this.shows);
-        for(String showName: user.getHistory().keySet()) {
+        for (String showName: user.getHistory().keySet()) {
             Show show = getShowByTitle(showName);
-            if(show != null){
+            if (show != null){
                 showsCopy.remove(show);
             }
         }
         JSONObject object = new JSONObject();
         object.put("id", action.getActionId());
-        if(!showsCopy.isEmpty()) {
+        if (!showsCopy.isEmpty()) {
             object.put("message", "StandardRecommendation result: " + showsCopy.get(0).getTitle());
-        }
-        else {
+        } else {
             object.put("message", "StandardRecommendation result: " + showsCopy);
         }
         return object;
@@ -869,8 +860,8 @@ final public class Database {
 
     public JSONArray runCommands() {
         JSONArray output = new JSONArray();
-        for(ActionInputData action: commandsData) {
-            switch(action.getActionType()) {
+        for (ActionInputData action: commandsData) {
+            switch (action.getActionType()) {
                 case Constants.COMMAND:
                     switch (action.getType()) {
                         case Constants.FAVORITE:
@@ -946,7 +937,7 @@ final public class Database {
                     }
                     break;
                 case Constants.RECOMMENDATION:
-                    switch(action.getType()) {
+                    switch (action.getType()) {
                         case Constants.STANDARD:
                             output.add(videosStandardRecommendation(action));
                             break;

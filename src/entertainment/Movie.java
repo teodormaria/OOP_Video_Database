@@ -1,7 +1,5 @@
 package entertainment;
 
-import fileio.MovieInputData;
-
 import java.util.ArrayList;
 import java.util.List;
 
