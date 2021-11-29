@@ -727,7 +727,6 @@ final public class Database {
             }
         }
         LinkedHashMap<String, Integer> sortedByRatings = sortHashMapByValueInteger(moviesFavorite, action.getSortType());
-        System.out.println(sortedByRatings);
         List<String> movies = new ArrayList<>();
         for(int i = 0; i < action.getNumber(); i++) {
             if(sortedByRatings.isEmpty()) {
@@ -814,6 +813,45 @@ final public class Database {
         return object;
     }
 
+    public JSONObject videosStandardRecommendation(ActionInputData action) {
+        User user = getUserByUsername(action.getUsername());
+        ArrayList<Movie> moviesCopy = new ArrayList<>();
+        moviesCopy.addAll(this.movies);
+        for(String movieName: user.getUser().getHistory().keySet()) {
+            Movie movie = getMovieByTitle(movieName);
+            if(movie != null) {
+                moviesCopy.remove(movie);
+            }
+        }
+        if(!moviesCopy.isEmpty()) {
+            JSONObject object = new JSONObject();
+            object.put("id", action.getActionId());
+            object.put("message", "StandardRecommendation result: " + moviesCopy.get(0).getMovie().getTitle());
+            return object;
+        }
+        ArrayList<Show> showsCopy = new ArrayList<>();
+        showsCopy.addAll(this.shows);
+        for(String showName: user.getUser().getHistory().keySet()) {
+            Show show = getShowByTitle(showName);
+            if(show != null){
+                showsCopy.remove(show);
+            }
+        }
+        JSONObject object = new JSONObject();
+        object.put("id", action.getActionId());
+        if(!showsCopy.isEmpty()) {
+            object.put("message", "StandardRecommendation result: " + showsCopy.get(0).getSerial().getTitle());
+        }
+        else {
+            object.put("message", "StandardRecommendation result: " + showsCopy);
+        }
+        return object;
+    }
+
+    public  JSONObject videosBestRecommendation(ActionInputData action) {
+        return null;
+    }
+
     public JSONArray runCommands() {
         JSONArray output = new JSONArray();
         for(ActionInputData action: commandsData) {
@@ -833,9 +871,9 @@ final public class Database {
                     }
                     break;
                 case Constants.QUERY:
-                    switch(action.getObjectType()) {
+                    switch (action.getObjectType()) {
                         case Constants.ACTORS:
-                            switch(action.getCriteria()) {
+                            switch (action.getCriteria()) {
                                 case Constants.AVERAGE:
                                     output.add(this.averageActors(action));
                                     break;
@@ -850,7 +888,7 @@ final public class Database {
                             }
                             break;
                         case Constants.MOVIES:
-                            switch(action.getCriteria()) {
+                            switch (action.getCriteria()) {
                                 case Constants.RATINGS:
                                     output.add(this.moviesByRating(action));
                                     break;
@@ -868,7 +906,7 @@ final public class Database {
                             }
                             break;
                         case Constants.SHOWS:
-                            switch(action.getCriteria()) {
+                            switch (action.getCriteria()) {
                                 case Constants.RATINGS:
                                     output.add(this.showsByRating(action));
                                     break;
@@ -892,6 +930,16 @@ final public class Database {
                             break;
                     }
                     break;
+                case Constants.RECOMMENDATION:
+                    switch(action.getType()) {
+                        case Constants.STANDARD:
+                            output.add(videosStandardRecommendation(action));
+                            break;
+                        case Constants.BEST_UNSEEN:
+                            output.add(videosBestRecommendation(action));
+                        default:
+                            break;
+                    }
                 default:
                     break;
             }

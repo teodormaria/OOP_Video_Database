@@ -49,12 +49,12 @@ public final class Season {
     }
 
     public Double averageRating() {
-        if(this.getRatings().isEmpty()) {
+        if (this.getRatings().isEmpty()) {
             return 0d;
         }
 
         Double average = 0d;
-        for(Double rating : this.getRatings()) {
+        for (Double rating : this.getRatings()) {
             average += rating;
         }
         average = average / this.getRatings().size();

@@ -11,7 +11,7 @@ public class Movie {
     private int timesAddedToFavorites;
     private int timesWatched;
 
-    public Movie (MovieInputData input) {
+    public Movie(final MovieInputData input) {
         this.movie = new MovieInputData(input);
         this.ratings = new ArrayList<>();
         this.timesAddedToFavorites = 0;
@@ -22,7 +22,7 @@ public class Movie {
         return movie;
     }
 
-    public void setMovie(MovieInputData movie) {
+    public void setMovie(final MovieInputData movie) {
         this.movie = movie;
     }
 
@@ -30,11 +30,11 @@ public class Movie {
         return ratings;
     }
 
-    public void setRatings(List<Double> ratings) {
+    public void setRatings(final List<Double> ratings) {
         this.ratings = ratings;
     }
 
-    public void addRating (final Double rating) {
+    public void addRating(final Double rating) {
         this.getRatings().add(rating);
     }
 
@@ -55,11 +55,11 @@ public class Movie {
     }
 
     public Double averageRating() {
-        if(this.getRatings().isEmpty()) {
+        if (this.getRatings().isEmpty()) {
             return 0d;
         }
         Double average = 0d;
-        for(Double rating : this.getRatings()){
+        for (Double rating : this.getRatings()) {
             average += rating;
         }
         average = average / this.getRatings().size();

@@ -7,7 +7,7 @@ public class Show {
     private int timesAddedToFavorites;
     private int timesWatched;
 
-    public Show (SerialInputData input){
+    public Show(final SerialInputData input) {
         this.serial = new SerialInputData(input);
         this.timesAddedToFavorites = 0;
         this.timesWatched = 0;
@@ -17,7 +17,7 @@ public class Show {
         return serial;
     }
 
-    public void setSerial(SerialInputData serial) {
+    public void setSerial(final SerialInputData serial) {
         this.serial = serial;
     }
 
@@ -39,7 +39,7 @@ public class Show {
 
     public int getDuration() {
         int duration = 0;
-        for(Season season: this.getSerial().getSeasons()) {
+        for (Season season: this.getSerial().getSeasons()) {
             duration += season.getDuration();
         }
         return duration;
@@ -47,7 +47,7 @@ public class Show {
 
     public Double serialAverageRating() {
         Double average = 0d;
-        for(Season season: this.getSerial().getSeasons()) {
+        for (Season season: this.getSerial().getSeasons()) {
             average += season.averageRating();
         }
         average = average / this.getSerial().getNumberSeason();
