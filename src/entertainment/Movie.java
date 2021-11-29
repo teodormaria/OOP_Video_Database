@@ -5,25 +5,24 @@ import fileio.MovieInputData;
 import java.util.ArrayList;
 import java.util.List;
 
-public class Movie {
-    private MovieInputData movie;
+public class Movie extends Video{
+    private final int duration;
     private List<Double> ratings;
     private int timesAddedToFavorites;
     private int timesWatched;
 
-    public Movie(final MovieInputData input) {
-        this.movie = new MovieInputData(input);
+    public Movie(final String title, final ArrayList<String> cast,
+                 final ArrayList<String> genres, final int year,
+                 final int duration) {
+        super(title, year, cast, genres);
+        this.duration = duration;
         this.ratings = new ArrayList<>();
         this.timesAddedToFavorites = 0;
         this.timesWatched = 0;
     }
 
-    public MovieInputData getMovie() {
-        return movie;
-    }
-
-    public void setMovie(final MovieInputData movie) {
-        this.movie = movie;
+    public int getDuration() {
+        return duration;
     }
 
     public List<Double> getRatings() {

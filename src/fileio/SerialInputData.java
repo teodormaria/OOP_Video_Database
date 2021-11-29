@@ -28,12 +28,6 @@ public final class SerialInputData extends ShowInput {
         this.seasons = seasons;
     }
 
-    public SerialInputData(SerialInputData other) {
-        super((ShowInput) other);
-        this.numberOfSeasons = other.getNumberSeason();
-        this.seasons = other.getSeasons();
-    }
-
     public int getNumberSeason() {
         return numberOfSeasons;
     }

@@ -1,8 +1,12 @@
 package repository;
 
 import actor.ActorsAwards;
-import fileio.*;
-import net.sf.json.JSON;
+import fileio.Input;
+import fileio.ActionInputData;
+import fileio.ActorInputData;
+import fileio.MovieInputData;
+import fileio.SerialInputData;
+import fileio.UserInputData;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import users.User;
@@ -11,7 +15,14 @@ import entertainment.Show;
 import common.Constants;
 import utils.Utils;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Collections;
+import java.util.Iterator;
+import java.util.Map;
+
 
 final public class Database {
     private static Database instance = null;
@@ -44,7 +55,7 @@ final public class Database {
 
     public User getUserByUsername(final String username) {
         for(User user: this.users) {
-            if(user.getUser().getUsername().equalsIgnoreCase(username)) {
+            if(user.getUsername().equalsIgnoreCase(username)) {
                 return user;
             }
         }
@@ -53,7 +64,7 @@ final public class Database {
 
     public Movie getMovieByTitle(final String title) {
         for(Movie movie: this.movies) {
-            if(movie.getMovie().getTitle().equalsIgnoreCase(title)) {
+            if(movie.getTitle().equalsIgnoreCase(title)) {
                 return movie;
             }
         }
@@ -62,7 +73,7 @@ final public class Database {
 
     public Show getShowByTitle(final String title) {
         for(Show show: this.shows) {
-            if(show.getSerial().getTitle().equalsIgnoreCase(title)) {
+            if(show.getTitle().equalsIgnoreCase(title)) {
                 return show;
             }
         }
@@ -110,16 +121,20 @@ final public class Database {
         this.setActorsData(input.getActors());
         this.setCommandsData(input.getCommands());
         for(UserInputData userData: input.getUsers()) {
-            this.users.add(new User(userData));
+            this.users.add(new User(userData.getUsername(), userData.getSubscriptionType(),
+                    userData.getHistory(), userData.getFavoriteMovies()));
         }
         for(MovieInputData movieData: input.getMovies()) {
-            this.movies.add(new Movie(movieData));
+            this.movies.add(new Movie(movieData.getTitle(), movieData.getCast(),
+                    movieData.getGenres(), movieData.getYear(), movieData.getDuration()));
         }
         for(SerialInputData serialData: input.getSerials()) {
-            this.shows.add(new Show(serialData));
+            this.shows.add(new Show(serialData.getTitle(), serialData.getCast(),
+                    serialData.getGenres(), serialData.getNumberSeason(), serialData.getSeasons(),
+                    serialData.getYear()));
         }
         for(User user: this.getUsers()) {
-            for(String video: user.getUser().getFavoriteMovies()) {
+            for(String video: user.getFavoriteVideos()) {
                 Movie movie = getMovieByTitle(video);
                 Show show = getShowByTitle(video);
                 if(movie != null) {
@@ -129,19 +144,19 @@ final public class Database {
                     show.addFavorite();
                 }
             }
-            for(String video: user.getUser().getHistory().keySet()) {
+            for(String video: user.getHistory().keySet()) {
                 Movie movie = getMovieByTitle(video);
                 Show show = getShowByTitle(video);
                 if(movie != null) {
-                    if(user.getUser().getHistory().containsKey(video)) {
-                        for(int i = 0; i < user.getUser().getHistory().get(video); i++) {
+                    if(user.getHistory().containsKey(video)) {
+                        for(int i = 0; i < user.getHistory().get(video); i++) {
                             movie.addView();
                         }
                     }
                 }
                 if(show != null) {
-                    if(user.getUser().getHistory().containsKey(video)) {
-                        for(int i = 0; i < user.getUser().getHistory().get(video); i++) {
+                    if(user.getHistory().containsKey(video)) {
+                        for(int i = 0; i < user.getHistory().get(video); i++) {
                             show.addView();
                         }
                     }
@@ -210,14 +225,14 @@ final public class Database {
             totalSeasons = 0;
         }
         else {
-            totalSeasons = show.getSerial().getNumberSeason();
+            totalSeasons = show.getNumberOfSeasons();
         }
         int isSuccess = user.addRating(command.getTitle(), totalSeasons, command.getSeasonNumber(), command.getGrade());
         if(isSuccess == 1) {
             movie.addRating(command.getGrade());
         }
         if(isSuccess == 2) {
-            show.getSerial().getSeasons().get(command.getSeasonNumber() - 1).addRating(command.getGrade());
+            show.getSeasons().get(command.getSeasonNumber() - 1).addRating(command.getGrade());
         }
         if(isSuccess == 1 || isSuccess == 2) {
             object.put("id", command.getActionId());
@@ -432,25 +447,25 @@ final public class Database {
                 Boolean noYear = (action.getFilters().get(0).get(0) == null);
                 Boolean noGenre = (action.getFilters().get(1).get(0) == null);
                 if(!noYear && !noGenre) {
-                    Boolean respectsYear = (action.getFilters().get(0).get(0).equalsIgnoreCase(String.valueOf(movie.getMovie().getYear())));
-                    Boolean respectsGenre = (movie.getMovie().getGenres().contains(action.getFilters().get(1).get(0)));
+                    Boolean respectsYear = (action.getFilters().get(0).get(0).equalsIgnoreCase(String.valueOf(movie.getYear())));
+                    Boolean respectsGenre = (movie.getGenres().contains(action.getFilters().get(1).get(0)));
                     if(respectsYear && respectsGenre) {
-                        movieRatings.put(movie.getMovie().getTitle(), movie.averageRating());
+                        movieRatings.put(movie.getTitle(), movie.averageRating());
                     }
                 }
                 else if(!noGenre) {
-                    Boolean respectsGenre = (movie.getMovie().getGenres().contains(action.getFilters().get(1).get(0)));
+                    Boolean respectsGenre = (movie.getGenres().contains(action.getFilters().get(1).get(0)));
                     if(respectsGenre) {
-                        movieRatings.put(movie.getMovie().getTitle(), movie.averageRating());
+                        movieRatings.put(movie.getTitle(), movie.averageRating());
                     }
                 } else if (!noYear) {
-                    Boolean respectsYear = (action.getFilters().get(0).get(0).equalsIgnoreCase(String.valueOf(movie.getMovie().getYear())));
+                    Boolean respectsYear = (action.getFilters().get(0).get(0).equalsIgnoreCase(String.valueOf(movie.getYear())));
                     if(respectsYear) {
-                        movieRatings.put(movie.getMovie().getTitle(), movie.averageRating());
+                        movieRatings.put(movie.getTitle(), movie.averageRating());
                     }
                 }
                 else {
-                    movieRatings.put(movie.getMovie().getTitle(), movie.averageRating());
+                    movieRatings.put(movie.getTitle(), movie.averageRating());
                 }
             }
         }
@@ -478,25 +493,25 @@ final public class Database {
                 Boolean noYear = (action.getFilters().get(0).get(0) == null);
                 Boolean noGenre = (action.getFilters().get(1).get(0) == null);
                 if(!noYear && !noGenre) {
-                    Boolean respectsYear = (action.getFilters().get(0).get(0).equalsIgnoreCase(String.valueOf(show.getSerial().getYear())));
-                    Boolean respectsGenre = (show.getSerial().getGenres().contains(action.getFilters().get(1).get(0)));
+                    Boolean respectsYear = (action.getFilters().get(0).get(0).equalsIgnoreCase(String.valueOf(show.getYear())));
+                    Boolean respectsGenre = (show.getGenres().contains(action.getFilters().get(1).get(0)));
                     if(respectsYear && respectsGenre) {
-                        showsRatings.put(show.getSerial().getTitle(), show.serialAverageRating());
+                        showsRatings.put(show.getTitle(), show.serialAverageRating());
                     }
                 }
                 else if(!noGenre) {
-                    Boolean respectsGenre = (show.getSerial().getGenres().contains(action.getFilters().get(1).get(0)));
+                    Boolean respectsGenre = (show.getGenres().contains(action.getFilters().get(1).get(0)));
                     if(respectsGenre) {
-                        showsRatings.put(show.getSerial().getTitle(), show.serialAverageRating());
+                        showsRatings.put(show.getTitle(), show.serialAverageRating());
                     }
                 } else if (!noYear) {
-                    Boolean respectsYear = (action.getFilters().get(0).get(0).equalsIgnoreCase(String.valueOf(show.getSerial().getYear())));
+                    Boolean respectsYear = (action.getFilters().get(0).get(0).equalsIgnoreCase(String.valueOf(show.getYear())));
                     if(respectsYear) {
-                        showsRatings.put(show.getSerial().getTitle(), show.serialAverageRating());
+                        showsRatings.put(show.getTitle(), show.serialAverageRating());
                     }
                 }
                 else {
-                    showsRatings.put(show.getSerial().getTitle(), show.serialAverageRating());
+                    showsRatings.put(show.getTitle(), show.serialAverageRating());
                 }
             }
         }
@@ -524,25 +539,25 @@ final public class Database {
                 Boolean noYear = (action.getFilters().get(0).get(0) == null);
                 Boolean noGenre = (action.getFilters().get(1).get(0) == null);
                 if(!noYear && !noGenre) {
-                    Boolean respectsYear = (action.getFilters().get(0).get(0).equalsIgnoreCase(String.valueOf(movie.getMovie().getYear())));
-                    Boolean respectsGenre = (movie.getMovie().getGenres().contains(action.getFilters().get(1).get(0)));
+                    Boolean respectsYear = (action.getFilters().get(0).get(0).equalsIgnoreCase(String.valueOf(movie.getYear())));
+                    Boolean respectsGenre = (movie.getGenres().contains(action.getFilters().get(1).get(0)));
                     if(respectsYear && respectsGenre) {
-                        moviesFavorite.put(movie.getMovie().getTitle(), movie.getTimesAddedToFavorites());
+                        moviesFavorite.put(movie.getTitle(), movie.getTimesAddedToFavorites());
                     }
                 }
                 else if(!noGenre) {
-                    Boolean respectsGenre = (movie.getMovie().getGenres().contains(action.getFilters().get(1).get(0)));
+                    Boolean respectsGenre = (movie.getGenres().contains(action.getFilters().get(1).get(0)));
                     if(respectsGenre) {
-                        moviesFavorite.put(movie.getMovie().getTitle(), movie.getTimesAddedToFavorites());
+                        moviesFavorite.put(movie.getTitle(), movie.getTimesAddedToFavorites());
                     }
                 } else if (!noYear) {
-                    Boolean respectsYear = (action.getFilters().get(0).get(0).equalsIgnoreCase(String.valueOf(movie.getMovie().getYear())));
+                    Boolean respectsYear = (action.getFilters().get(0).get(0).equalsIgnoreCase(String.valueOf(movie.getYear())));
                     if(respectsYear) {
-                        moviesFavorite.put(movie.getMovie().getTitle(), movie.getTimesAddedToFavorites());
+                        moviesFavorite.put(movie.getTitle(), movie.getTimesAddedToFavorites());
                     }
                 }
                 else {
-                    moviesFavorite.put(movie.getMovie().getTitle(), movie.getTimesAddedToFavorites());
+                    moviesFavorite.put(movie.getTitle(), movie.getTimesAddedToFavorites());
                 }
             }
         }
@@ -570,25 +585,25 @@ final public class Database {
                 Boolean noYear = (action.getFilters().get(0).get(0) == null);
                 Boolean noGenre = (action.getFilters().get(1).get(0) == null);
                 if(!noYear && !noGenre) {
-                    Boolean respectsYear = (action.getFilters().get(0).get(0).equalsIgnoreCase(String.valueOf(show.getSerial().getYear())));
-                    Boolean respectsGenre = (show.getSerial().getGenres().contains(action.getFilters().get(1).get(0)));
+                    Boolean respectsYear = (action.getFilters().get(0).get(0).equalsIgnoreCase(String.valueOf(show.getYear())));
+                    Boolean respectsGenre = (show.getGenres().contains(action.getFilters().get(1).get(0)));
                     if(respectsYear && respectsGenre) {
-                        showsFavorite.put(show.getSerial().getTitle(), show.getTimesAddedToFavorites());
+                        showsFavorite.put(show.getTitle(), show.getTimesAddedToFavorites());
                     }
                 }
                 else if(!noGenre) {
-                    Boolean respectsGenre = (show.getSerial().getGenres().contains(action.getFilters().get(1).get(0)));
+                    Boolean respectsGenre = (show.getGenres().contains(action.getFilters().get(1).get(0)));
                     if(respectsGenre) {
-                        showsFavorite.put(show.getSerial().getTitle(), show.getTimesAddedToFavorites());
+                        showsFavorite.put(show.getTitle(), show.getTimesAddedToFavorites());
                     }
                 } else if (!noYear) {
-                    Boolean respectsYear = (action.getFilters().get(0).get(0).equalsIgnoreCase(String.valueOf(show.getSerial().getYear())));
+                    Boolean respectsYear = (action.getFilters().get(0).get(0).equalsIgnoreCase(String.valueOf(show.getYear())));
                     if(respectsYear) {
-                        showsFavorite.put(show.getSerial().getTitle(), show.getTimesAddedToFavorites());
+                        showsFavorite.put(show.getTitle(), show.getTimesAddedToFavorites());
                     }
                 }
                 else {
-                    showsFavorite.put(show.getSerial().getTitle(), show.getTimesAddedToFavorites());
+                    showsFavorite.put(show.getTitle(), show.getTimesAddedToFavorites());
                 }
             }
         }
@@ -615,25 +630,25 @@ final public class Database {
             Boolean noYear = (action.getFilters().get(0).get(0) == null);
             Boolean noGenre = (action.getFilters().get(1).get(0) == null);
             if(!noYear && !noGenre) {
-                Boolean respectsYear = (action.getFilters().get(0).get(0).equalsIgnoreCase(String.valueOf(movie.getMovie().getYear())));
-                Boolean respectsGenre = (movie.getMovie().getGenres().contains(action.getFilters().get(1).get(0)));
+                Boolean respectsYear = (action.getFilters().get(0).get(0).equalsIgnoreCase(String.valueOf(movie.getYear())));
+                Boolean respectsGenre = (movie.getGenres().contains(action.getFilters().get(1).get(0)));
                 if(respectsYear && respectsGenre) {
-                    moviesFavorite.put(movie.getMovie().getTitle(), movie.getMovie().getDuration());
+                    moviesFavorite.put(movie.getTitle(), movie.getDuration());
                 }
             }
             else if(!noGenre) {
-                Boolean respectsGenre = (movie.getMovie().getGenres().contains(action.getFilters().get(1).get(0)));
+                Boolean respectsGenre = (movie.getGenres().contains(action.getFilters().get(1).get(0)));
                 if(respectsGenre) {
-                    moviesFavorite.put(movie.getMovie().getTitle(), movie.getMovie().getDuration());
+                    moviesFavorite.put(movie.getTitle(), movie.getDuration());
                 }
             } else if (!noYear) {
-                Boolean respectsYear = (action.getFilters().get(0).get(0).equalsIgnoreCase(String.valueOf(movie.getMovie().getYear())));
+                Boolean respectsYear = (action.getFilters().get(0).get(0).equalsIgnoreCase(String.valueOf(movie.getYear())));
                 if(respectsYear) {
-                    moviesFavorite.put(movie.getMovie().getTitle(), movie.getMovie().getDuration());
+                    moviesFavorite.put(movie.getTitle(), movie.getDuration());
                 }
             }
             else {
-                moviesFavorite.put(movie.getMovie().getTitle(), movie.getMovie().getDuration());
+                moviesFavorite.put(movie.getTitle(), movie.getDuration());
             }
         }
         LinkedHashMap<String, Integer> sortedByRatings = sortHashMapByValueInteger(moviesFavorite, action.getSortType());
@@ -659,25 +674,25 @@ final public class Database {
             Boolean noYear = (action.getFilters().get(0).get(0) == null);
             Boolean noGenre = (action.getFilters().get(1).get(0) == null);
             if(!noYear && !noGenre) {
-                Boolean respectsYear = (action.getFilters().get(0).get(0).equalsIgnoreCase(String.valueOf(show.getSerial().getYear())));
-                Boolean respectsGenre = (show.getSerial().getGenres().contains(action.getFilters().get(1).get(0)));
+                Boolean respectsYear = (action.getFilters().get(0).get(0).equalsIgnoreCase(String.valueOf(show.getYear())));
+                Boolean respectsGenre = (show.getGenres().contains(action.getFilters().get(1).get(0)));
                 if(respectsYear && respectsGenre) {
-                    showsFavorite.put(show.getSerial().getTitle(), show.getDuration());
+                    showsFavorite.put(show.getTitle(), show.getDuration());
                 }
             }
             else if(!noGenre) {
-                Boolean respectsGenre = (show.getSerial().getGenres().contains(action.getFilters().get(1).get(0)));
+                Boolean respectsGenre = (show.getGenres().contains(action.getFilters().get(1).get(0)));
                 if(respectsGenre) {
-                    showsFavorite.put(show.getSerial().getTitle(), show.getDuration());
+                    showsFavorite.put(show.getTitle(), show.getDuration());
                 }
             } else if (!noYear) {
-                Boolean respectsYear = (action.getFilters().get(0).get(0).equalsIgnoreCase(String.valueOf(show.getSerial().getYear())));
+                Boolean respectsYear = (action.getFilters().get(0).get(0).equalsIgnoreCase(String.valueOf(show.getYear())));
                 if(respectsYear) {
-                    showsFavorite.put(show.getSerial().getTitle(), show.getDuration());
+                    showsFavorite.put(show.getTitle(), show.getDuration());
                 }
             }
             else {
-                showsFavorite.put(show.getSerial().getTitle(), show.getDuration());
+                showsFavorite.put(show.getTitle(), show.getDuration());
             }
         }
         LinkedHashMap<String, Integer> sortedByRatings = sortHashMapByValueInteger(showsFavorite, action.getSortType());
@@ -704,25 +719,25 @@ final public class Database {
                 Boolean noYear = (action.getFilters().get(0).get(0) == null);
                 Boolean noGenre = (action.getFilters().get(1).get(0) == null);
                 if(!noYear && !noGenre) {
-                    Boolean respectsYear = (action.getFilters().get(0).get(0).equalsIgnoreCase(String.valueOf(movie.getMovie().getYear())));
-                    Boolean respectsGenre = (movie.getMovie().getGenres().contains(action.getFilters().get(1).get(0)));
+                    Boolean respectsYear = (action.getFilters().get(0).get(0).equalsIgnoreCase(String.valueOf(movie.getYear())));
+                    Boolean respectsGenre = (movie.getGenres().contains(action.getFilters().get(1).get(0)));
                     if(respectsYear && respectsGenre) {
-                        moviesFavorite.put(movie.getMovie().getTitle(), movie.getTimesWatched());
+                        moviesFavorite.put(movie.getTitle(), movie.getTimesWatched());
                     }
                 }
                 else if(!noGenre) {
-                    Boolean respectsGenre = (movie.getMovie().getGenres().contains(action.getFilters().get(1).get(0)));
+                    Boolean respectsGenre = (movie.getGenres().contains(action.getFilters().get(1).get(0)));
                     if(respectsGenre) {
-                        moviesFavorite.put(movie.getMovie().getTitle(), movie.getTimesWatched());
+                        moviesFavorite.put(movie.getTitle(), movie.getTimesWatched());
                     }
                 } else if (!noYear) {
-                    Boolean respectsYear = (action.getFilters().get(0).get(0).equalsIgnoreCase(String.valueOf(movie.getMovie().getYear())));
+                    Boolean respectsYear = (action.getFilters().get(0).get(0).equalsIgnoreCase(String.valueOf(movie.getYear())));
                     if(respectsYear) {
-                        moviesFavorite.put(movie.getMovie().getTitle(), movie.getTimesWatched());
+                        moviesFavorite.put(movie.getTitle(), movie.getTimesWatched());
                     }
                 }
                 else {
-                    moviesFavorite.put(movie.getMovie().getTitle(), movie.getTimesWatched());
+                    moviesFavorite.put(movie.getTitle(), movie.getTimesWatched());
                 }
             }
         }
@@ -750,25 +765,25 @@ final public class Database {
                 Boolean noYear = (action.getFilters().get(0).get(0) == null);
                 Boolean noGenre = (action.getFilters().get(1).get(0) == null);
                 if(!noYear && !noGenre) {
-                    Boolean respectsYear = (action.getFilters().get(0).get(0).equalsIgnoreCase(String.valueOf(show.getSerial().getYear())));
-                    Boolean respectsGenre = (show.getSerial().getGenres().contains(action.getFilters().get(1).get(0)));
+                    Boolean respectsYear = (action.getFilters().get(0).get(0).equalsIgnoreCase(String.valueOf(show.getYear())));
+                    Boolean respectsGenre = (show.getGenres().contains(action.getFilters().get(1).get(0)));
                     if(respectsYear && respectsGenre) {
-                        showsFavorite.put(show.getSerial().getTitle(), show.getTimesWatched());
+                        showsFavorite.put(show.getTitle(), show.getTimesWatched());
                     }
                 }
                 else if(!noGenre) {
-                    Boolean respectsGenre = (show.getSerial().getGenres().contains(action.getFilters().get(1).get(0)));
+                    Boolean respectsGenre = (show.getGenres().contains(action.getFilters().get(1).get(0)));
                     if(respectsGenre) {
-                        showsFavorite.put(show.getSerial().getTitle(), show.getTimesWatched());
+                        showsFavorite.put(show.getTitle(), show.getTimesWatched());
                     }
                 } else if (!noYear) {
-                    Boolean respectsYear = (action.getFilters().get(0).get(0).equalsIgnoreCase(String.valueOf(show.getSerial().getYear())));
+                    Boolean respectsYear = (action.getFilters().get(0).get(0).equalsIgnoreCase(String.valueOf(show.getYear())));
                     if(respectsYear) {
-                        showsFavorite.put(show.getSerial().getTitle(), show.getTimesWatched());
+                        showsFavorite.put(show.getTitle(), show.getTimesWatched());
                     }
                 }
                 else {
-                    showsFavorite.put(show.getSerial().getTitle(), show.getTimesWatched());
+                    showsFavorite.put(show.getTitle(), show.getTimesWatched());
                 }
             }
         }
@@ -793,7 +808,7 @@ final public class Database {
         HashMap<String, Integer> userReviews = new HashMap<>();
         for(User user: this.getUsers()) {
             if(user.getNumberOfRatings() != 0) {
-                userReviews.put(user.getUser().getUsername(),user.getNumberOfRatings());
+                userReviews.put(user.getUsername(),user.getNumberOfRatings());
             }
         }
         LinkedHashMap<String, Integer> sortedByReviews = sortHashMapByValueInteger(userReviews, action.getSortType());
@@ -817,7 +832,7 @@ final public class Database {
         User user = getUserByUsername(action.getUsername());
         ArrayList<Movie> moviesCopy = new ArrayList<>();
         moviesCopy.addAll(this.movies);
-        for(String movieName: user.getUser().getHistory().keySet()) {
+        for(String movieName: user.getHistory().keySet()) {
             Movie movie = getMovieByTitle(movieName);
             if(movie != null) {
                 moviesCopy.remove(movie);
@@ -826,12 +841,12 @@ final public class Database {
         if(!moviesCopy.isEmpty()) {
             JSONObject object = new JSONObject();
             object.put("id", action.getActionId());
-            object.put("message", "StandardRecommendation result: " + moviesCopy.get(0).getMovie().getTitle());
+            object.put("message", "StandardRecommendation result: " + moviesCopy.get(0).getTitle());
             return object;
         }
         ArrayList<Show> showsCopy = new ArrayList<>();
         showsCopy.addAll(this.shows);
-        for(String showName: user.getUser().getHistory().keySet()) {
+        for(String showName: user.getHistory().keySet()) {
             Show show = getShowByTitle(showName);
             if(show != null){
                 showsCopy.remove(show);
@@ -840,7 +855,7 @@ final public class Database {
         JSONObject object = new JSONObject();
         object.put("id", action.getActionId());
         if(!showsCopy.isEmpty()) {
-            object.put("message", "StandardRecommendation result: " + showsCopy.get(0).getSerial().getTitle());
+            object.put("message", "StandardRecommendation result: " + showsCopy.get(0).getTitle());
         }
         else {
             object.put("message", "StandardRecommendation result: " + showsCopy);

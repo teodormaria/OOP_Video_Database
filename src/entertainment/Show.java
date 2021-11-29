@@ -2,23 +2,33 @@ package entertainment;
 
 import fileio.SerialInputData;
 
-public class Show {
-    private SerialInputData serial;
+import java.util.ArrayList;
+
+public class Show extends Video{
+
+    private final int numberOfSeasons;
+    private final ArrayList<Season> seasons;
     private int timesAddedToFavorites;
     private int timesWatched;
 
-    public Show(final SerialInputData input) {
-        this.serial = new SerialInputData(input);
+    public Show(final String title, final ArrayList<String> cast,
+                final ArrayList<String> genres,
+                final int numberOfSeasons, final ArrayList<Season> seasons,
+                final int year) {
+        super(title, year, cast, genres);
+        this.numberOfSeasons = numberOfSeasons;
+        this.seasons = new ArrayList<>();
+        this.seasons.addAll(seasons);
         this.timesAddedToFavorites = 0;
         this.timesWatched = 0;
     }
 
-    public SerialInputData getSerial() {
-        return serial;
+    public int getNumberOfSeasons() {
+        return numberOfSeasons;
     }
 
-    public void setSerial(final SerialInputData serial) {
-        this.serial = serial;
+    public ArrayList<Season> getSeasons() {
+        return seasons;
     }
 
     public void addFavorite() {
@@ -39,7 +49,7 @@ public class Show {
 
     public int getDuration() {
         int duration = 0;
-        for (Season season: this.getSerial().getSeasons()) {
+        for (Season season: this.getSeasons()) {
             duration += season.getDuration();
         }
         return duration;
@@ -47,10 +57,10 @@ public class Show {
 
     public Double serialAverageRating() {
         Double average = 0d;
-        for (Season season: this.getSerial().getSeasons()) {
+        for (Season season: this.getSeasons()) {
             average += season.averageRating();
         }
-        average = average / this.getSerial().getNumberSeason();
+        average = average / this.getNumberOfSeasons();
 
         return average;
     }

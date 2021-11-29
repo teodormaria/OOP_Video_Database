@@ -33,15 +33,6 @@ public abstract class ShowInput {
         this.genres = genres;
     }
 
-    public ShowInput(ShowInput other) {
-        this.title = other.getTitle();
-        this.year = other.getYear();
-        this.cast = new ArrayList<>();
-        this.cast.addAll(other.getCast());
-        this.genres = new ArrayList<>();
-        this.genres.addAll(other.getGenres());
-    }
-
     public final String getTitle() {
         return title;
     }

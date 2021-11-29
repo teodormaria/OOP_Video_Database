@@ -7,24 +7,62 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class User {
-    private UserInputData user;
+    private final String username;
+    private final String subscriptionType;
+    private Map<String, Integer> history;
+    private ArrayList<String> favoriteVideos;
     private int numberOfRatings;
     private Map<String,Double> moviesRatings;
     private Map<String, ArrayList<Double>> showRatings;
 
-    public User(UserInputData input) {
-        this.user = new UserInputData(input);
+    public User(final String username, final String subscriptionType,
+                final Map<String, Integer> history,
+                final ArrayList<String> favoriteVideos) {
+        this.username = username;
+        this.subscriptionType = subscriptionType;
+        this.history = new HashMap<>();
+        this.history.putAll(history);
+        this.favoriteVideos = new ArrayList<>();
+        this.favoriteVideos.addAll(favoriteVideos);
         this.numberOfRatings = 0;
         this.moviesRatings = new HashMap<>();
         this.showRatings = new HashMap<>();
     }
 
-    public UserInputData getUser() {
-        return user;
+    public String getUsername() {
+        return username;
     }
 
-    public void setUser(UserInputData user) {
-        this.user = user;
+    public String getSubscriptionType() {
+        return subscriptionType;
+    }
+
+    public Map<String, Integer> getHistory() {
+        return history;
+    }
+
+    public ArrayList<String> getFavoriteVideos() {
+        return favoriteVideos;
+    }
+
+    public void setNumberOfRatings(int numberOfRatings) {
+        this.numberOfRatings = numberOfRatings;
+    }
+
+    public Map<String, Double> getMoviesRatings() {
+        return moviesRatings;
+    }
+
+    public void setMoviesRatings(Map<String, Double> moviesRatings) {
+        this.moviesRatings = moviesRatings;
+    }
+
+    public Map<String, ArrayList<Double>> getShowRatings() {
+        return showRatings;
+    }
+
+    public void setShowRatings(Map<String, ArrayList<Double>> showRatings) {
+        this.showRatings = showRatings;
     }
 
     public int getNumberOfRatings() {
@@ -32,42 +70,42 @@ public class User {
     }
 
     public int addFavorite(final String video) {
-        if(this.user.getFavoriteMovies().contains(video)) {
+        if (this.getFavoriteVideos().contains(video)) {
             return -1;
         }
-        if(!this.user.getHistory().containsKey(video)) {
+        if (!this.getHistory().containsKey(video)) {
             return 0;
         }
-        this.user.getFavoriteMovies().add(video);
+        this.getFavoriteVideos().add(video);
         return 1;
     }
 
     public int watch(final String video) {
-        if(this.user.getHistory().containsKey(video)) {
-            int previousValue = this.user.getHistory().get(video);
-            this.user.getHistory().remove(video);
-            this.user.getHistory().put(video, previousValue + 1);
+        if (this.getHistory().containsKey(video)) {
+            int previousValue = this.getHistory().get(video);
+            this.getHistory().remove(video);
+            this.getHistory().put(video, previousValue + 1);
             return previousValue + 1;
         }
         else {
-            this.user.getHistory().put(video, 1);
+            this.getHistory().put(video, 1);
             return 1;
         }
     }
 
     public int addRating(final String video,final int totalSeasons, final int seasonNum, final Double rating) {
-        if(this.user.getHistory().containsKey(video)) {
+        if (this.getHistory().containsKey(video)) {
             if(this.moviesRatings.containsKey(video)) {
                 return -1;
             }
-            else if(seasonNum == 0) {
+            else if (seasonNum == 0) {
                 this.moviesRatings.put(video, rating);
                 this.numberOfRatings++;
 
                 return 1;
             }
-            if(this.showRatings.containsKey(video)) {
-                if(this.showRatings.get(video).get(seasonNum - 1) != 0d) {
+            if (this.showRatings.containsKey(video)) {
+                if (this.showRatings.get(video).get(seasonNum - 1) != 0d) {
                     return -1;
                 }
                 else {
@@ -76,9 +114,9 @@ public class User {
                     return 2;
                 }
             }
-            else if(seasonNum != 0) {
+            else if (seasonNum != 0) {
                 ArrayList<Double> showRating = new ArrayList<>();
-                for(int i = 0; i < totalSeasons; i++) {
+                for (int i = 0; i < totalSeasons; i++) {
                     showRating.add(0d);
                 }
                 showRating.set(seasonNum - 1, rating);

@@ -20,11 +20,6 @@ public final class MovieInputData extends ShowInput {
         this.duration = duration;
     }
 
-    public MovieInputData(MovieInputData other) {
-        super((ShowInput) other);
-        this.duration = other.duration;
-    }
-
     public int getDuration() {
         return duration;
     }

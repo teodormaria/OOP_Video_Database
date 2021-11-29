@@ -37,15 +37,6 @@ public final class UserInputData {
         this.history = history;
     }
 
-    public UserInputData(UserInputData other) {
-        this.username = other.getUsername();
-        this.subscriptionType = other.getSubscriptionType();
-        this.history = new HashMap<>();
-        this.history.putAll(other.getHistory());
-        this.favoriteMovies = new ArrayList<>();
-        this.favoriteMovies.addAll(other.getFavoriteMovies());
-    }
-
     public String getUsername() {
         return username;
     }
