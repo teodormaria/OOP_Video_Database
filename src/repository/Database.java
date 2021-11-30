@@ -773,10 +773,26 @@ final public class Database {
         if (user.getSubscriptionType().equalsIgnoreCase(Constants.BASIC)) {
             JSONObject object = new JSONObject();
             object.put("id", action.getActionId());
-            object.put("message", "PopularRecommendation cannot be applied!");
+            object.put("message", "FavoriteRecommendation cannot be applied!");
             return object;
         }
-        return null;
+        ArrayList<Video> videosUnwatched = this.getUnwatched(action.getUsername());
+        LinkedHashMap<String, Double> videosFavourite= new LinkedHashMap<>();
+        for (Video video: videosUnwatched) {
+            if (video.getTimesAddedToFavorites() != 0) {
+                videosFavourite.put(video.getTitle(), (double) video.getTimesAddedToFavorites());
+            }
+        }
+        List<String> videos = sortHashMapByValue(videosFavourite, Constants.DESC,
+                1, Boolean.FALSE);
+        JSONObject object = new JSONObject();
+        object.put("id", action.getActionId());
+        if (videosFavourite.isEmpty()) {
+            object.put("message", "FavoriteRecommendation cannot be applied!");
+        } else {
+            object.put("message", "FavoriteRecommendation result: " + videos.get(0));
+        }
+        return object;
     }
 
     private JSONObject videosSearchRecommendation(ActionInputData action) {
@@ -784,7 +800,7 @@ final public class Database {
         if (user.getSubscriptionType().equalsIgnoreCase(Constants.BASIC)) {
             JSONObject object = new JSONObject();
             object.put("id", action.getActionId());
-            object.put("message", "PopularRecommendation cannot be applied!");
+            object.put("message", "SearchRecommendation cannot be applied!");
             return object;
         }
         return null;
