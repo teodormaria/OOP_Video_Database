@@ -1,12 +1,16 @@
 package entertainment;
 
+import utils.Utils;
+
 import java.util.ArrayList;
 
-public class Video {
+public abstract class Video {
     private final String title;
     private final int year;
     private final ArrayList<String> cast;
-    private final ArrayList<String> genres;
+    private final ArrayList<Genre> genres;
+    private int timesAddedToFavorites;
+    private int timesWatched;
 
     public Video(String title, int year, ArrayList<String> cast, ArrayList<String> genres) {
         this.title = title;
@@ -14,11 +18,22 @@ public class Video {
         this.cast = new ArrayList<>();
         this.cast.addAll(cast);
         this.genres = new ArrayList<>();
-        this.genres.addAll(genres);
+        for (String genre: genres) {
+            this.genres.add(Utils.stringToGenre(genre));
+        }
+        this.timesAddedToFavorites = 0;
+        this.timesWatched = 0;
     }
 
     public String getTitle() {
         return title;
+    }
+
+    @Override
+    public String toString() {
+        return "Video{" +
+                "title='" + title + '\'' +
+                '}';
     }
 
     public int getYear() {
@@ -29,7 +44,25 @@ public class Video {
         return cast;
     }
 
-    public ArrayList<String> getGenres() {
+    public ArrayList<Genre> getGenres() {
         return genres;
     }
+
+    public void addFavorite() {
+        this.timesAddedToFavorites++;
+    }
+
+    public int getTimesAddedToFavorites() {
+        return this.timesAddedToFavorites;
+    }
+
+    public int getTimesWatched() {
+        return this.timesWatched;
+    }
+
+    public void addView() {
+        this.timesWatched++;
+    }
+
+    public abstract Double getAverageRating();
 }

@@ -88,6 +88,9 @@ public final class Constants {
     public static final String BEST_UNSEEN = "best_unseen";
     public static final String POPULAR = "popular";
     public static final String SEARCH = "search";
+    public static final String PREMIUM = "PREMIUM";
+    public static final String BASIC = "BASIC";
+
     public static final int YEAR_FILTER = 0;
     public static final int GENRE_FILTER = 1;
     public static final int WORD_FILTER = 2;

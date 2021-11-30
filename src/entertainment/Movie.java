@@ -3,11 +3,9 @@ package entertainment;
 import java.util.ArrayList;
 import java.util.List;
 
-public class Movie extends Video{
+public class Movie extends Video {
     private final int duration;
     private List<Double> ratings;
-    private int timesAddedToFavorites;
-    private int timesWatched;
 
     public Movie(final String title, final ArrayList<String> cast,
                  final ArrayList<String> genres, final int year,
@@ -15,8 +13,6 @@ public class Movie extends Video{
         super(title, year, cast, genres);
         this.duration = duration;
         this.ratings = new ArrayList<>();
-        this.timesAddedToFavorites = 0;
-        this.timesWatched = 0;
     }
 
     public int getDuration() {
@@ -35,23 +31,7 @@ public class Movie extends Video{
         this.getRatings().add(rating);
     }
 
-    public void addFavorite() {
-        this.timesAddedToFavorites++;
-    }
-
-    public int getTimesAddedToFavorites() {
-        return this.timesAddedToFavorites;
-    }
-
-    public int getTimesWatched() {
-        return this.timesWatched;
-    }
-
-    public void addView() {
-        this.timesWatched++;
-    }
-
-    public Double averageRating() {
+    public Double getAverageRating() {
         if (this.getRatings().isEmpty()) {
             return 0d;
         }
