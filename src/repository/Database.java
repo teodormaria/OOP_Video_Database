@@ -227,8 +227,6 @@ final public class Database {
         if (show != null) {
             show.addView();
             for (Genre genre: show.getGenres()) {
-                System.out.println(this.getGenresViews());
-                System.out.println(genre);
                 int prevValue = this.getGenresViews().get(genre);
                 this.getGenresViews().remove(genre);
                 this.getGenresViews().put(genre, prevValue + 1);
@@ -305,14 +303,18 @@ final public class Database {
     }
 
     private List<String> sortHashMapByValue(final HashMap<String, Double> unsortedMap,
-                                            final String order, final int number,
-                                            final Boolean alphabetical) {
+                                            final String orderValues, final String orderKeys,
+                                            final int number, final Boolean alphabetical) {
         List<String> keys = new ArrayList<>(unsortedMap.keySet());
         List<Double> values = new ArrayList<>(unsortedMap.values());
         if (alphabetical) {
-            Collections.sort(keys);
+            if(orderKeys.equalsIgnoreCase(Constants.ASC)) {
+                Collections.sort(keys);
+            } else {
+                keys.sort(Collections.reverseOrder());
+            }
         }
-        switch (order) {
+        switch (orderValues) {
             case Constants.ASC -> Collections.sort(values);
             case Constants.DESC -> values.sort(Collections.reverseOrder());
             default -> {
@@ -350,15 +352,23 @@ final public class Database {
             actorRatings.put(actor.getName(), this.getActorAverage(actor.getName()));
         }
         List<String> actors = sortHashMapByValue(actorRatings, action.getSortType(),
-                action.getNumber(), Boolean.TRUE);
+                action.getSortType(), action.getNumber(), Boolean.TRUE);
         JSONObject object = new JSONObject();
         object.put("id", action.getActionId());
         object.put("message", "Query result: " + actors);
         return object;
     }
 
+    private int awardsNum(ActorInputData actor) {
+        int number = 0;
+        for (Map.Entry<ActorsAwards,Integer> entry: actor.getAwards().entrySet()) {
+            number = number + entry.getValue();
+        }
+        return number;
+    }
+
     private JSONObject awardedActors(ActionInputData action) {
-        ArrayList<String> actors = new ArrayList<>();
+        HashMap<String, Double> goodActors = new HashMap<>();
         for (ActorInputData actor: this.actorsData) {
             boolean hasAwards = Boolean.TRUE;
             for (String award: action.getFilters().get(Constants.AWARD_FILTER)) {
@@ -369,29 +379,15 @@ final public class Database {
                 }
             }
             if (hasAwards) {
-                actors.add(actor.getName());
+                goodActors.put(actor.getName(), (double) this.awardsNum(actor));
             }
         }
-        if (Objects.equals(action.getSortType(), Constants.ASC)) {
-            Collections.sort(actors);
-        } else if (Objects.equals(action.getSortType(), Constants.DESC)) {
-            actors.sort(Collections.reverseOrder());
-        }
-        if (actors.size() < action.getNumber()) {
-            JSONObject object = new JSONObject();
-            object.put("id", action.getActionId());
-            object.put("message", "Query result: " + actors);
-            return object;
-        } else {
-            ArrayList<String> nActors = new ArrayList<>();
-            for (int i = 0; i < action.getNumber(); i++) {
-                nActors.add(actors.get(i));
-            }
-            JSONObject object = new JSONObject();
-            object.put("id", action.getActionId());
-            object.put("message", "Query result: " + nActors);
-            return object;
-        }
+        List<String> orderedActors = sortHashMapByValue(goodActors, action.getSortType(),
+                action.getSortType(), this.getActorsData().size(), Boolean.TRUE);
+        JSONObject object = new JSONObject();
+        object.put("id", action.getActionId());
+        object.put("message", "Query result: " + orderedActors);
+        return object;
     }
 
     private JSONObject filterWords(ActionInputData action) {
@@ -413,21 +409,10 @@ final public class Database {
         } else if (Objects.equals(action.getSortType(), Constants.DESC)) {
             actors.sort(Collections.reverseOrder());
         }
-        if (actors.size() < action.getNumber()) {
-            JSONObject object = new JSONObject();
-            object.put("id", action.getActionId());
-            object.put("message", "Query result: " + actors);
-            return object;
-        } else {
-            ArrayList<String> nActors = new ArrayList<>();
-            for (int i = 0; i < action.getNumber(); i++) {
-                nActors.add(actors.get(i));
-            }
-            JSONObject object = new JSONObject();
-            object.put("id", action.getActionId());
-            object.put("message", "Query result: " + nActors);
-            return object;
-        }
+        JSONObject object = new JSONObject();
+        object.put("id", action.getActionId());
+        object.put("message", "Query result: " + actors);
+        return object;
     }
 
     private ArrayList<Video> filterYearGenre(ActionInputData action, Boolean isMovie) {
@@ -500,7 +485,7 @@ final public class Database {
                 movieRatings.put(movie.getTitle(), movie.getAverageRating());
             }
         }
-        List<String> videos = sortHashMapByValue(movieRatings,
+        List<String> videos = sortHashMapByValue(movieRatings, action.getSortType(),
                 action.getSortType(), action.getNumber(), Boolean.TRUE);
         JSONObject object = new JSONObject();
         object.put("id", action.getActionId());
@@ -517,7 +502,7 @@ final public class Database {
             }
         }
         List<String> shows = sortHashMapByValue(showsRatings, action.getSortType(),
-                action.getNumber(), Boolean.TRUE);
+                action.getSortType(), action.getNumber(), Boolean.TRUE);
         JSONObject object = new JSONObject();
         object.put("id", action.getActionId());
         object.put("message", "Query result: " + shows);
@@ -534,7 +519,7 @@ final public class Database {
             }
         }
         List<String> videos = sortHashMapByValue(moviesFavorite, action.getSortType(),
-                action.getNumber(), Boolean.TRUE);
+                action.getSortType(), action.getNumber(), Boolean.TRUE);
         JSONObject object = new JSONObject();
         object.put("id", action.getActionId());
         object.put("message", "Query result: " + videos);
@@ -551,7 +536,7 @@ final public class Database {
             }
         }
         List<String> videos = sortHashMapByValue(showsFavorite, action.getSortType(),
-                action.getNumber(), Boolean.TRUE);
+                action.getSortType(), action.getNumber(), Boolean.TRUE);
         JSONObject object = new JSONObject();
         object.put("id", action.getActionId());
         object.put("message", "Query result: " + videos);
@@ -565,7 +550,7 @@ final public class Database {
             moviesDuration.put(movie.getTitle(), (double) ((Movie) movie).getDuration());
         }
         List<String> videos = sortHashMapByValue(moviesDuration, action.getSortType(),
-                action.getNumber(), Boolean.TRUE);
+                action.getSortType(), action.getNumber(), Boolean.TRUE);
         JSONObject object = new JSONObject();
         object.put("id", action.getActionId());
         object.put("message", "Query result: " + videos);
@@ -579,7 +564,7 @@ final public class Database {
             showsDuration.put(show.getTitle(), (double) ((Show) show).getDuration());
         }
         List<String> videos = sortHashMapByValue(showsDuration, action.getSortType(),
-                action.getNumber(), Boolean.TRUE);
+                action.getSortType(), action.getNumber(), Boolean.TRUE);
         JSONObject object = new JSONObject();
         object.put("id", action.getActionId());
         object.put("message", "Query result: " + videos);
@@ -595,7 +580,7 @@ final public class Database {
             }
         }
         List<String> videos = sortHashMapByValue(moviesViews, action.getSortType(),
-                action.getNumber(), Boolean.TRUE);
+                action.getSortType(), action.getNumber(), Boolean.TRUE);
         JSONObject object = new JSONObject();
         object.put("id", action.getActionId());
         object.put("message", "Query result: " + videos);
@@ -611,7 +596,7 @@ final public class Database {
             }
         }
         List<String> shows = sortHashMapByValue(showsViews, action.getSortType(),
-                action.getNumber(), Boolean.TRUE);
+                action.getSortType(), action.getNumber(), Boolean.TRUE);
         JSONObject object = new JSONObject();
         object.put("id", action.getActionId());
         object.put("message", "Query result: " + shows);
@@ -626,7 +611,7 @@ final public class Database {
             }
         }
         List<String> users = sortHashMapByValue(userReviews, action.getSortType(),
-                action.getNumber(), Boolean.TRUE);
+                action.getSortType(), action.getNumber(), Boolean.TRUE);
         JSONObject object = new JSONObject();
         object.put("id", action.getActionId());
         object.put("message", "Query result: " + users);
@@ -676,7 +661,7 @@ final public class Database {
         for (Video video: videosUnwatched) {
             videosRatings.put(video.getTitle(), video.getAverageRating());
         }
-        List<String> videos = sortHashMapByValue(videosRatings, Constants.DESC,
+        List<String> videos = sortHashMapByValue(videosRatings, Constants.DESC, Constants.DESC,
                 1, Boolean.FALSE);
         JSONObject object = new JSONObject();
         object.put("id", action.getActionId());
@@ -766,8 +751,6 @@ final public class Database {
         return object;
     }
 
-
-
     private JSONObject videosFavouriteRecommendation(ActionInputData action) {
         User user = getUserByUsername(action.getUsername());
         if (user.getSubscriptionType().equalsIgnoreCase(Constants.BASIC)) {
@@ -783,7 +766,7 @@ final public class Database {
                 videosFavourite.put(video.getTitle(), (double) video.getTimesAddedToFavorites());
             }
         }
-        List<String> videos = sortHashMapByValue(videosFavourite, Constants.DESC,
+        List<String> videos = sortHashMapByValue(videosFavourite, Constants.DESC, Constants.ASC,
                 1, Boolean.FALSE);
         JSONObject object = new JSONObject();
         object.put("id", action.getActionId());
@@ -803,7 +786,35 @@ final public class Database {
             object.put("message", "SearchRecommendation cannot be applied!");
             return object;
         }
-        return null;
+        ArrayList<Video> videosByGenre =
+                this.getVideosByGenre(Utils.stringToGenre(action.getGenre()));
+        for (String videoName: user.getHistory().keySet()) {
+            Movie movie = getMovieByTitle(videoName);
+            Show show = getShowByTitle(videoName);
+            if (movie != null) {
+                videosByGenre.remove(movie);
+            }
+            if (show != null) {
+                videosByGenre.remove(show);
+            }
+        }
+        HashMap<String, Double> videoRatings = new HashMap<>();
+        for (Video video: videosByGenre) {
+            videoRatings.put(video.getTitle(), video.getAverageRating());
+        }
+        List<String> bestVideos = sortHashMapByValue(videoRatings, Constants.DESC, Constants.ASC,
+                this.getMovies().size() + this.getShows().size(), Boolean.TRUE);
+        if (bestVideos.isEmpty()) {
+            JSONObject object = new JSONObject();
+            object.put("id", action.getActionId());
+            object.put("message", "SearchRecommendation cannot be applied!");
+            return object;
+        }
+        JSONObject object = new JSONObject();
+        object.put("id", action.getActionId());
+        object.put("message", "SearchRecommendation result: " + bestVideos);
+        return object;
+
     }
 
     public JSONArray runCommands() {
