@@ -783,7 +783,7 @@ public final class Database {
         for (Video video: videosByGenre) {
             videoRatings.put(video.getTitle(), video.getAverageRating());
         }
-        List<String> bestVideos = sortHashMapByValue(videoRatings, Constants.DESC, Constants.ASC,
+        List<String> bestVideos = sortHashMapByValue(videoRatings, Constants.ASC, Constants.ASC,
                 this.getMovies().size() + this.getShows().size(), true);
         if (bestVideos.isEmpty()) {
             JSONObject object = new JSONObject();
