@@ -19,6 +19,8 @@ import utils.Utils;
 
 import java.util.*;
 
+import static java.lang.Double.NaN;
+
 
 final public class Database {
     private static Database instance = null;
@@ -349,7 +351,9 @@ final public class Database {
     private JSONObject averageActors(ActionInputData action) {
         HashMap<String, Double> actorRatings = new HashMap<>();
         for (ActorInputData actor: this.getActorsData()) {
-            actorRatings.put(actor.getName(), this.getActorAverage(actor.getName()));
+            if (!Double.isNaN(this.getActorAverage(actor.getName()))) {
+                actorRatings.put(actor.getName(), this.getActorAverage(actor.getName()));
+            }
         }
         List<String> actors = sortHashMapByValue(actorRatings, action.getSortType(),
                 action.getSortType(), action.getNumber(), Boolean.TRUE);
@@ -393,10 +397,18 @@ final public class Database {
     private JSONObject filterWords(ActionInputData action) {
         ArrayList<String> actors = new ArrayList<>();
         for (ActorInputData actor: this.actorsData) {
-            boolean hasWords = Boolean.TRUE;
+            String []s = actor.getCareerDescription().toLowerCase().split(" |-|\\.|\\s(|\\s)|,");
+            boolean hasWords = true;
             for (String word: action.getFilters().get(Constants.WORD_FILTER)) {
-                if (!actor.getCareerDescription().toLowerCase().contains(word)) {
-                    hasWords = Boolean.FALSE;
+                boolean hasWord = false;
+                for (String descriptionWord : s) {
+                    if (descriptionWord.compareTo(word) == 0) {
+                        hasWord = true;
+                        break;
+                    }
+                }
+                if (!hasWord) {
+                    hasWords = false;
                     break;
                 }
             }
@@ -649,7 +661,7 @@ final public class Database {
             object.put("message", "StandardRecommendation result: "
                     + videosUnwatched.get(0).getTitle());
         } else {
-            object.put("message", "StandardRecommendation result: " + videosUnwatched);
+            object.put("message", "StandardRecommendation cannot be applied!");
         }
         return object;
     }
