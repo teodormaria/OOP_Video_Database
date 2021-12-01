@@ -2,7 +2,7 @@ package entertainment;
 
 import java.util.ArrayList;
 
-public class Show extends Video {
+public final class Show extends Video {
 
     private final int numberOfSeasons;
     private final ArrayList<Season> seasons;

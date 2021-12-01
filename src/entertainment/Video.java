@@ -26,18 +26,31 @@ public abstract class Video {
         this.timesWatched = 0;
     }
 
+    /**
+     * @return video title
+     */
     public String getTitle() {
         return title;
     }
 
+    /**
+     *
+     * @return year that video was published
+     */
     public int getYear() {
         return year;
     }
 
+    /**
+     * @return list of actors' names
+     */
     public ArrayList<String> getCast() {
         return cast;
     }
 
+    /**
+     * @return video genres
+     */
     public ArrayList<Genre> getGenres() {
         return genres;
     }
@@ -49,10 +62,16 @@ public abstract class Video {
         this.timesAddedToFavorites++;
     }
 
+    /**
+     * @return times video was added to favorites
+     */
     public int getTimesAddedToFavorites() {
         return this.timesAddedToFavorites;
     }
 
+    /**
+     * @return times video was watched
+     */
     public int getTimesWatched() {
         return this.timesWatched;
     }

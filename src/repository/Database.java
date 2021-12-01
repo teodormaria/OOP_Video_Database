@@ -26,7 +26,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
-final public class Database {
+public final class Database {
     private static Database instance = null;
     private List<ActorInputData> actorsData;
     private List<User> users = new ArrayList<>();
@@ -312,7 +312,7 @@ final public class Database {
     private Double getActorAverage(final String actorName) {
         ActorInputData actor = getActorByName(actorName);
         int totalRated = 0;
-        Double average = 0d;
+        double average = 0d;
         assert actor != null;
         for (String videoName: actor.getFilmography()) {
             Movie movie = getMovieByTitle(videoName);
@@ -428,7 +428,7 @@ final public class Database {
     private JSONObject filterWords(final ActionInputData action) {
         ArrayList<String> actors = new ArrayList<>();
         for (ActorInputData actor: this.actorsData) {
-            String[]s;
+            String[] s;
             s = actor.getCareerDescription().toLowerCase().split(" |-|\\.|\\s(|\\s)|,");
             boolean hasWords = true;
             for (String word: action.getFilters().get(Constants.WORD_FILTER)) {
