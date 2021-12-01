@@ -12,7 +12,8 @@ public abstract class Video {
     private int timesAddedToFavorites;
     private int timesWatched;
 
-    public Video(String title, int year, ArrayList<String> cast, ArrayList<String> genres) {
+    public Video(final String title, final int year, final ArrayList<String> cast,
+                 final ArrayList<String> genres) {
         this.title = title;
         this.year = year;
         this.cast = new ArrayList<>();
@@ -27,13 +28,6 @@ public abstract class Video {
 
     public String getTitle() {
         return title;
-    }
-
-    @Override
-    public String toString() {
-        return "Video{" +
-                "title='" + title + '\'' +
-                '}';
     }
 
     public int getYear() {

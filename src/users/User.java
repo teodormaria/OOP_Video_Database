@@ -43,18 +43,6 @@ public class User {
         return favoriteVideos;
     }
 
-    public void setNumberOfRatings(int numberOfRatings) {
-        this.numberOfRatings = numberOfRatings;
-    }
-
-    public Map<String, Double> getMoviesRatings() {
-        return moviesRatings;
-    }
-
-    public Map<String, ArrayList<Double>> getShowRatings() {
-        return showRatings;
-    }
-
     public int getNumberOfRatings() {
         return numberOfRatings;
     }
