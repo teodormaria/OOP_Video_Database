@@ -44,10 +44,17 @@ public final class Season {
         this.ratings = ratings;
     }
 
+    /**
+     * @param rating for rating to be added to ratings list
+     */
     public void addRating(final Double rating) {
         this.getRatings().add(rating);
     }
 
+    /**
+     *
+     * @return average rating for season
+     */
     public Double averageRating() {
         if (this.getRatings().isEmpty()) {
             return 0d;
@@ -60,16 +67,6 @@ public final class Season {
         average = average / this.getRatings().size();
 
         return average;
-    }
-
-    @Override
-    public String toString() {
-        return "Episode{"
-                + "currentSeason="
-                + currentSeason
-                + ", duration="
-                + duration
-                + '}';
     }
 }
 

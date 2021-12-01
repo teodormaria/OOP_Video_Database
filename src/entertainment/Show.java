@@ -26,6 +26,9 @@ public class Show extends Video {
         return seasons;
     }
 
+    /**
+     * @return sum of all seasons durations
+     */
     public int getDuration() {
         int duration = 0;
         for (Season season: this.getSeasons()) {
@@ -34,6 +37,9 @@ public class Show extends Video {
         return duration;
     }
 
+    /**
+     * @return average rating for show, if season is unrated its rating is considered 0
+     */
     public Double getAverageRating() {
         Double average = 0d;
         for (Season season: this.getSeasons()) {

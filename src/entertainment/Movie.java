@@ -27,10 +27,16 @@ public class Movie extends Video {
         this.ratings = ratings;
     }
 
+    /**
+    * @param rating  for rating to be added to ratings list
+     */
     public void addRating(final Double rating) {
         this.getRatings().add(rating);
     }
 
+    /**
+     * @return average rating for movie
+     */
     public Double getAverageRating() {
         if (this.getRatings().isEmpty()) {
             return 0d;

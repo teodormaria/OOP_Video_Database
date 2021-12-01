@@ -47,6 +47,12 @@ public class User {
         return numberOfRatings;
     }
 
+    /**
+     *
+     * @param video represents video to be added to favourites
+     * @return -1 if video was already added to favorites, 0 if video hasn't been watched
+     * yet and can't be rated, and 1 if operation was successful
+     */
     public int addFavorite(final String video) {
         if (this.getFavoriteVideos().contains(video)) {
             return -1;
@@ -58,6 +64,10 @@ public class User {
         return 1;
     }
 
+    /**
+     * @param video represents the title of the video to be watched
+     * @return how many times video has been watched so far
+     */
     public int watch(final String video) {
         if (this.getHistory().containsKey(video)) {
             int previousValue = this.getHistory().get(video);
@@ -70,6 +80,15 @@ public class User {
         }
     }
 
+    /**
+     * @param video represents video that need to be rated
+     * @param totalSeasons represents the number of seasons in case video is show
+     * @param seasonNum represents the number of season to be rated in case video
+     *                  is show, 0 otherwise
+     * @param rating represents the grade given by user
+     * @return -1 if movie or season has already been rated, 0 if video hasn't been watched,
+     * 1 if movie was rated successfully, and 2 if season was rated successfully
+     */
     public int addRating(final String video, final int totalSeasons, final int seasonNum,
                          final Double rating) {
         if (this.getHistory().containsKey(video)) {
@@ -78,7 +97,6 @@ public class User {
             } else if (seasonNum == 0) {
                 this.moviesRatings.put(video, rating);
                 this.numberOfRatings++;
-
                 return 1;
             }
             if (this.showRatings.containsKey(video)) {

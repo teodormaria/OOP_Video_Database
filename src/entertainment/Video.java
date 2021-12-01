@@ -42,6 +42,9 @@ public abstract class Video {
         return genres;
     }
 
+    /**
+     * keeps count of times video was added to favorites
+     */
     public void addFavorite() {
         this.timesAddedToFavorites++;
     }
@@ -54,9 +57,20 @@ public abstract class Video {
         return this.timesWatched;
     }
 
+    /**
+     * keeps track of how many times video was watched
+     */
     public void addView() {
         this.timesWatched++;
     }
 
+    /**
+     * @return average rating for video
+     */
     public abstract Double getAverageRating();
+
+    /**
+     * @return video duration
+     */
+    public abstract int getDuration();
 }
